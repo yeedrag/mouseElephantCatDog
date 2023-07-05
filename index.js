@@ -1,46 +1,95 @@
-//Make the DIV element draggagle:
-dragElement(document.getElementById("mydiv"));
+const qry = (...query) => document.querySelector(...query);
+const qrys = (...query) => document.querySelectorAll(...query);
 
-function dragElement(elmnt) {
-	var pos1 = 0,
-		pos2 = 0,
-		pos3 = 0,
-		pos4 = 0;
-	if (document.getElementById(elmnt.id + "header")) {
-		/* if present, the header is where you move the DIV from:*/
-		document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
-	} else {
-		/* otherwise, move the DIV from anywhere inside the DIV:*/
-		elmnt.onmousedown = dragMouseDown;
-	}
+const workspace = qry("#workspace");
 
-	function dragMouseDown(e) {
-		e = e || window.event;
-		e.preventDefault();
-		// get the mouse cursor position at startup:
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-		document.onmouseup = closeDragElement;
-		// call a function whenever the cursor moves:
-		document.onmousemove = elementDrag;
-	}
+// when .x and .y change, modify #workspace accordingly
+const workspaceConf = new Proxy({showingX: 0, showingY: 0, scale: 1}, {
+	set: (target, key, value) => {
+		target[key] = value;
 
-	function elementDrag(e) {
-		e = e || window.event;
-		e.preventDefault();
-		// calculate the new cursor position:
-		pos1 = pos3 - e.clientX;
-		pos2 = pos4 - e.clientY;
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-		// set the element's new position:
-		elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-		elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+		switch(key){
+			case "showingX":
+			case "showingY":
+				workspace.style["translate"] = `${-target.showingX}px ${-target.showingY}px`;
+				break;
+			case "scale":
+				workspace.style["scale"] = `${target.scale}`;
+				break;
+		}
 	}
+});
 
-	function closeDragElement() {
-		/* stop moving when mouse button is released:*/
-		document.onmouseup = null;
-		document.onmousemove = null;
-	}
+// init workspace
+for(let key in workspaceConf) {
+	workspaceConf[key] = workspaceConf[key];
 }
+
+// move the workspace while mouse dragging
+qry("#workspaceContainer").addEventListener("mousedown", e => {
+	const move = e => { // mousemove event
+		workspaceConf.showingX -= e.movementX;
+		workspaceConf.showingY -= e.movementY;
+	}
+
+	document.body.addEventListener("mousemove", move);
+	document.body.addEventListener(
+		"mouseup",
+		e => document.body.removeEventListener("mousemove", move),
+		{once: true}
+	);
+})
+
+function createBlock({
+	header,
+	content,
+	position: [x = workspaceConf.showingX, y = workspaceConf.showingY] = []
+}){
+	// todo: change this element to import and export to json files
+	let block = document.createElement("div");
+	block.classList.add("block");
+	block.innerHTML = `
+		<div class="inputPorts"></div>
+		<div class="header">${header || ""}</div>
+		<div class="content">${content || ""}</div>
+		<div class="outputPorts"></div>
+	`;
+
+	block.style["left"] = `${x}px`;
+	block.style["right"] = `${y}px`;
+	
+	block.children[1].addEventListener("mousedown", e => {
+		const move = e => { // mousemove
+			x += e.movementX / workspaceConf.scale;
+			y += e.movementY / workspaceConf.scale;
+			block.style["left"] = `${x}px`;
+			block.style["top"] = `${y}px`;
+		}
+
+		document.body.addEventListener("mousemove", move);
+		document.body.addEventListener(
+			"mouseup",
+			e => document.body.removeEventListener("mousemove", move),
+			{once: true}
+		);
+	});
+
+	// this is used to prevent unexpected workspace move
+	block.addEventListener("mousedown", e => e.stopPropagation());
+
+
+
+	return block;
+}
+
+qry("#addBlock").addEventListener("click", e => {
+	qry("#workspace").appendChild(
+		createBlock({
+			header: prompt("Please write some HTML for the header"),
+			content: prompt("Please write some HTML for the content")
+		})
+	);
+});
+
+// create a Input block
+qry("#workspace").appendChild(createBlock({header: "Input"}));

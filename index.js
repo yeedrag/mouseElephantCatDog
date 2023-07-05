@@ -56,7 +56,7 @@ function createBlock({
 	`;
 
 	block.style["left"] = `${x}px`;
-	block.style["right"] = `${y}px`;
+	block.style["top"] = `${y}px`;
 	
 	block.children[1].addEventListener("mousedown", e => {
 		const move = e => { // mousemove

@@ -1,4 +1,4 @@
-//Make the DIV element draggagle:
+//Make the DIV element draggable:
 dragElement(document.getElementById("mydiv"));
 
 function dragElement(elmnt) {

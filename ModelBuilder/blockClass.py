@@ -20,7 +20,7 @@ class Block(nn.Module):
     def forward(self, x):
         return x
 # maybe can name each layer with layer name + index?
-class linear(Block):
+class Linear(Block):
     def __init__(self, data, index, inputSize = [], outputSize = [], bias = True):
         super().__init__(data, index, inputSize, outputSize)
         self.bias = bias
@@ -38,12 +38,14 @@ class ReLU(Block):
         #self.updateShape()
     def forward(self, x):
         return self.net(x)
+    
 class Input(Block):
     def __init__(self, data, index, inputSize = [], outputSize = []):
         super().__init__(data, index, inputSize, outputSize)
     def forward(self, x):
         #self.updateShape()
         return x
+    
 class Concat(Block):
     def __init__(self, data, index, inputSize = [], outputSize = [], dim = 1):
         super().__init__(data, index, inputSize, outputSize)

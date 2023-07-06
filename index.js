@@ -58,7 +58,12 @@ qry("#workspaceContainer").addEventListener("mousedown", e => {
 // scale the workspace while scrolling
 {
 	let mousePosInWsC = [0, 0]; // mouse's position in workspace container
-	qry("#workspaceContainer").addEventListener("mousemove", e => mousePosInWsC = [e.layerX, e.layerY]);
+	qry("#workspaceContainer").addEventListener("mousemove", e => {
+		let wsCBox = workspaceContainer.getBoundingClientRect();
+		mousePosInWsC = [e.x - wsCBox.x, e.y - wsCBox.y];
+			// we can't just set that to [e.layerX, e.layerY] 'cuz
+			// the "layer" may be any block the cursor's hovering on
+	});
 
 	qry("#workspaceContainer").addEventListener("wheel", e => {
 		let oldScale = workspaceConf.scale;

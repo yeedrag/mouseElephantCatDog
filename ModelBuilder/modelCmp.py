@@ -8,13 +8,13 @@ class model(nn.Module):
         self.a = a
         self.b = b
         self.c = c
-        self.layers = nn.ModuleList([nn.Linear(2, 5), nn.Linear(2, 5), nn.Linear(10, 1)]).cuda()
+        self.layers = nn.ModuleList([nn.Linear(2, 5), nn.Linear(2, 5), nn.Linear(10, 1), nn.ReLU()]).cuda()
     def forward(self, x):
         x1 = self.layers[0](x)
         x2 = self.layers[1](x)
-        x3 = self.layers[2](torch.cat((x1,x2),-1))
+        x3 = (torch.cat((x1,x2),-1))
+        x4 = self.layers[2](x3)
+        x5 = self.layers[3](x4)
         return x3
 torchModel = model(1,2,3).cuda()
 summary(torchModel,(32,2))
-dummyInput = torch.rand([32,2]).cuda()
-torch.onnx.export(torchModel,dummyInput,"modelCmp.onnx")

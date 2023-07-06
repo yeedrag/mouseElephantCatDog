@@ -45,7 +45,7 @@ class Input(Block):
     def forward(self, x):
         #self.updateShape()
         return x
-    
+# We should calculate inputsize and outputsize in __init__ .....
 class Concat(Block):
     def __init__(self, data, index, inputSize = [], outputSize = [], dim = 1):
         super().__init__(data, index, inputSize, outputSize)

@@ -46,7 +46,6 @@ class model(nn.Module):
 	def initWeight(self):
 		raise NotImplementedError #TODO
 	def forward(self, x): #problem: multi-input, which goes to which?
-		print("x.shape: ", x.shape)
 		xArray = [0] * self.dataLength
 		for idx, i in enumerate(self.topologicalOrder):
 			if(len(self.data[idx]["parent"]) == 0):
@@ -64,7 +63,6 @@ def modelBuilder(path): # should be able to choose output method
 		dummyInput = torch.rand([32,2]).cuda()
 		print(torchModel)
 		summary(torchModel,dummyInput)
-		torch.save(torchModel, "A:\ModelBuilder\model.pt")
 		torch.onnx.export(torchModel,dummyInput,"model.onnx")
 path = os.path.join("model.pt")
 modelBuilder(path)

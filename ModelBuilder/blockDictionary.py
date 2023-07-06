@@ -1,6 +1,6 @@
 import blockClass as blockClass
 callBlock = {
-    "Linear": blockClass.linear, 
+    "Linear": blockClass.Linear, 
      "ReLU": blockClass.ReLU,
     "Input": blockClass.Input,
     "Concat": blockClass.Concat

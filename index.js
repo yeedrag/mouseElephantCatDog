@@ -126,3 +126,27 @@ qry("#addBlock").addEventListener("click", e => {
 
 // create a Input block
 qry("#workspace").appendChild(createBlock({header: "Input"}));
+
+//add lines between blocks by pressing both blocks
+function createLines(){
+	//Check Button state
+	var lineButton = document.getElementById('addLine');
+	let buttonState = false;
+	lineButton.addEventListener('click', function handleClick() {
+	console.log('Submit button is clicked');
+	if (!buttonState) {
+		buttonState = true;
+		let line = document.createElement("svg");
+		line.innerHTML = <line></line>
+		//get positions
+		var startTop = 
+		var startLeft = 
+		var endTop = 
+		var endLeft = 
+
+	}
+	else buttonState = false;
+	});
+	
+
+}

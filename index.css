@@ -2,8 +2,7 @@
 	box-sizing: border-box;
 }
 
-html {
-}
+
 
 body {
 	background-color: black;
@@ -85,4 +84,9 @@ body > div {
 
 .block > .content {
 	background-color: #222;
+}
+
+#new-link-line {
+    position: absolute; /* allows to position it anywhere */
+    stroke: #000; /*line color is black*/
 }

@@ -16,7 +16,7 @@ class Block(nn.Module):
     def updateShape(self):
         # bug :(
         self.data[self.index]["inputSize"] = self.inputSize
-        self.data[self.index]["outputSize"] = self.outShape
+        self.data[self.index]["outputSize"] = self.outputSize
     def forward(self, x):
         return x
 # maybe can name each layer with layer name + index?

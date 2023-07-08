@@ -35,6 +35,8 @@ const workspaceConf = new Proxy({ movementX: 0, movementY: 0, scale: 1 }, {
 			workspace.style["translate"] = `${target.movementX}px ${target.movementY}px`;
 			// note: the "translate"d amounts seem not to be affected by "scale"
 		}
+
+		return true; // set handler should return true if success.
 	}
 });
 
@@ -148,72 +150,85 @@ qry("#addBlock").addEventListener("click", e => {
 	);
 });
 
-
 // create a Input block
 qry("#workspace").appendChild(createBlock({ header: "Input" }));
 
+// add lines while button#addLine is clicked
+{
+	const addLineBtn = qry("#addLine"), wsDiv = qry("#workspace");
 
-var lineAddStatus = false;
+	const prepareForAnotherProcess = () => {
+		// "process" here and below means the period while connecting two blocks
 
+		addLineBtn.innerHTML = `Connect Blocks`;
+		addLineBtn.addEventListener("click", addLine, {once: true});
+	};
 
-//add lines between blocks by pressing both blocks
-function createLines({
-	startX,
-	startY,
-	endX,
-	endY
-}) {
-	//Check Button state
-	/*let lineButton = document.getElementById('addLine');
-	let buttonState = false;
-	lineButton.addEventListener('click', function handleClick() {
-	if (!buttonState) buttonState = true;
-	else buttonState = false;
-	});
-	while (buttonState) { */
+	const addLine = async e => { // click event
+		addLineBtn.innerHTML = `Stop Connecting Blocks`;
 
+		// cancel the process if clicked again
+		// all the long-term processes should listen to this AbortController.signal
+		const addLineProcess = new AbortController();
+		addLineBtn.addEventListener("click", e => {
+			addLineProcess.abort();
+			prepareForAnotherProcess();
+		}, {once: true});
 
-	let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-	line.setAttribute('id', 'line2');
-	line.setAttribute('x1', startX);
-	line.setAttribute('y1', startY);
-	line.setAttribute('x2', endX);
-	line.setAttribute('y2', endY);
-	line.setAttribute("stroke", "black");
-	$("svg").append(line);
-	//}
+		// userSelectedABlock() is defined later
+		let block1 = await userSelectedABlock({signal: addLineProcess.signal})
+			.catch(err => {	
+				if(err.name != "aborted")
+					console.log("Error: ", err);
+			});
+		let block2 = await userSelectedABlock({signal: addLineProcess.signal})
+			.catch(err => {
+				if(err.name != "aborted")
+					console.log("Error: ", err);
+			});
 
+		if(addLineProcess.signal.aborted) return prepareForAnotherProcess();
+		if(block1 == block2){
+			alert("You can't connect a block to itself!"),
+			prepareForAnotherProcess();
+			return;
+		}
 
+		// now draw a line for the two blocks
+		console.log(block1, block2); // to do
 
+		prepareForAnotherProcess();
+	};
 
-}
+	prepareForAnotherProcess();
 
-function selectBlock(){
-	qry("#workspace").addEventListener('click', (e) => {
-		let clickedElement = e.parentElement;
-		while(!e.classList.contains("block")){
-			let clickedElement = clickedElement.parentElement; // this line is changed
-		} 
-		clickedElement.style["background-color"] = "#d3d3d3";
-			// strings need "" around
-			// e != clickedElement
-	}, {once: true}) // this makes it run once
-}
+	const userSelectedABlock = ({signal: signal}) => {
+		return new Promise((resolve, reject) => {
+			if(signal.aborted) fail({name: "aborted"});
+			signal.addEventListener("abort", e => reject({name: "aborted"}), {once: true});
 
+			const findTheBlock = e => { // click event
+				// finding block
+				let tmp = e.target;
+				while(!tmp.classList.contains("block")){
+					if(tmp == wsDiv){
+						listenToClick();
+						alert("Please click on a block");
+						return;
+					}
+					tmp = tmp.parentElement;
+				}
+				const block = tmp;
+				resolve(block);
+			};
 
-qry("#addLine").addEventListener("click", e => {
-	if (!lineAddStatus) {
-		lineAddStatus = true;
-		document.getElementById("addLine").innerHTML = "click two blocks";
-	} else {
-		lineAddStatus = false;
-		document.getElementById("addLine").innerHTML = "Connect Blocks";
+			const listenToClick = () => wsDiv.addEventListener(
+				"click",
+				findTheBlock,
+				{signal: signal, once: true}
+			);
+
+			listenToClick();
+		});
 	}
-})
-
-
-while (lineAddStatus) {
-	selectBlock;
 }
-
-

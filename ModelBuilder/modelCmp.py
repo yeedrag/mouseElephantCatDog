@@ -8,7 +8,8 @@ class model(nn.Module):
         self.a = a
         self.b = b
         self.c = c
-        self.layers = nn.ModuleList([nn.Linear(2, 5), nn.Linear(2, 5), nn.Linear(10, 1), nn.ReLU()]).cuda()
+        self.lst = [nn.Linear(2, 5), nn.Linear(2, 5), nn.Linear(10, 1), nn.ReLU()]
+        self.layers = nn.ModuleList(self.lst).cuda()
     def forward(self, x):
         x1 = self.layers[0](x)
         x2 = self.layers[1](x)

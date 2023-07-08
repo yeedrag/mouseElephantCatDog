@@ -11,7 +11,6 @@ class modelBuilderPreparer():
 		self.data = json.load(file)
 		self.dataLength = len(self.data)
 		self.topologicalOrder = self.toTopological()
-		#self.inputRoot = self.topologicalOrder[0] # not needed
 	def toTopological(self):
 		topologicalArray = []
 		inDeg = np.zeros(self.dataLength)
@@ -37,27 +36,26 @@ class model(nn.Module):
 		self.data = data
 		self.dataLength = dataLength
 		self.topologicalOrder = topologicalOrder
-		self.layers = nn.ModuleList()
+		self.layersArr = [0] * self.dataLength
 		for idx in self.topologicalOrder:
-			# cautious! use append, order need to be careful!
-			self.layers.append(callBlock[self.data[idx]["blockName"]](self.data,idx,*self.data[idx]["args"].values())) 
-			# should have a function return torch layer according to data[i]["block_name"]
+			self.layersArr[idx] = callBlock[self.data[idx]["blockName"]](self.data, idx, *self.data[idx]["args"].values())
+		self.layers = nn.ModuleList(self.layersArr)
 		self.layers.cuda() # cuda :)
 	def initWeight(self):
 		raise NotImplementedError #TODO
 	def forward(self, x): #problem: multi-input, which goes to which?
 		xArray = [0] * self.dataLength
-		for idx, i in enumerate(self.topologicalOrder):
+		for idx in self.topologicalOrder:
 			if(len(self.data[idx]["parent"]) == 0):
-				xArray[idx] = self.layers[i](x)
+				xArray[idx] = self.layers[idx](x)
 			elif(len(self.data[idx]["parent"]) == 1): # single input
-				xArray[idx] = self.layers[i](xArray[self.data[idx]["parent"][0]]) #single input
+				xArray[idx] = self.layers[idx](xArray[self.data[idx]["parent"][0]]) #single input
 			else:
-				xArray[idx] = self.layers[i]([xArray[j] for j in self.data[idx]["parent"]]) # multiple input
+				xArray[idx] = self.layers[idx]([xArray[j] for j in self.data[idx]["parent"]]) # multiple input
 			#print([i.shape if type(i) == torch.Tensor else 0 for i in xArray])
 		return xArray[self.topologicalOrder[-1]]
 def modelBuilder(path): # should be able to choose output method
-	with open(os.path.join('test.json')) as f:
+	with open(os.path.join('./test.json')) as f:
 		preparer = modelBuilderPreparer(f)      
 		torchModel = model(*preparer.getAttr()).cuda()
 		dummyInput = torch.rand([32,2]).cuda()

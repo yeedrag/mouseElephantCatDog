@@ -55,12 +55,12 @@ class model(nn.Module):
 			#print([i.shape if type(i) == torch.Tensor else 0 for i in xArray])
 		return xArray[self.topologicalOrder[-1]]
 def modelBuilder(path): # should be able to choose output method
-	with open(os.path.join('./test.json')) as f:
+	with open(os.path.join(path)) as f:
 		preparer = modelBuilderPreparer(f)      
 		torchModel = model(*preparer.getAttr()).cuda()
 		dummyInput = torch.rand([32,2]).cuda()
 		print(torchModel)
 		summary(torchModel,dummyInput)
 		torch.onnx.export(torchModel,dummyInput,"model.onnx")
-path = os.path.join("model.pt")
+path = os.path.join('./test.json')
 modelBuilder(path)

@@ -45,7 +45,7 @@
         }
     },
     {
-        "blockName": "ReLU",
+        "blockName": "Activation",
         "parent": [4],
         "child": [],
         "args": {

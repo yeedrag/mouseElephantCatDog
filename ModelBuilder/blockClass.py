@@ -20,6 +20,11 @@ class Block(nn.Module):
     def forward(self, x):
         return x
 # maybe can name each layer with layer name + index?
+
+# Super important! change from searching in data to searching in xArray instead!!!!
+# Or else for concat, relu, conv.... with no set output will assertion error for self.inputsize != 0
+# fix tomorrow!!!!!!! its 3 a.m and I should sleep!!!!
+
 class Linear(Block):
     def __init__(self, data, index, inputSize = [], outputSize = [], bias = True):
         super().__init__(data, index, inputSize, outputSize)
@@ -31,10 +36,20 @@ class Linear(Block):
         #self.updateShape()
         return self.net(x)
 
-class ReLU(Block):
-    def __init__(self, data, index, inputSize = [], outputSize = []):
+class Activation(Block):
+    def __init__(self, data, index, inputSize = [], outputSize = [], mode = "ReLU"): # type is reserved lmao
         super().__init__(data, index, inputSize, outputSize)
-        self.net = nn.ReLU()
+        match mode:
+            case "ReLU":
+                self.net = nn.ReLU()
+            case "LeakyReLU":
+                self.net = nn.LeakyReLU()
+            case "Sigmoid":
+                self.net = nn.Sigmoid()
+            case "Tanh":
+                self.net = nn.Tanh()
+            case _: # other
+                raise NotImplementedError
         #self.updateShape()
     def forward(self, x):
         return self.net(x)
@@ -49,12 +64,25 @@ class Input(Block):
 class Concat(Block):
     def __init__(self, data, index, inputSize = [], outputSize = [], dim = 1):
         super().__init__(data, index, inputSize, outputSize)
-        self.dim = dim
+        self.ref = self.data[self.data[self.index]["parent"][0]]["args"]["outputSize"] # choose 1st parent as reference
+        self.dim = dim if dim >= 0 else len(self.ref) - abs(dim) # convert to index >= 0
+        assert len(self.ref) > dim and dim > 0 # check if dim is valid
+        self.inputSize = [self.ref]
+        for idx in range(1, len(self.data[index]["parent"])):
+            size = self.data[idx]["args"]["outputSize"]
+            self.inputSize.append(size)
+            for i in range(0, len(self.ref)): # check if values beside dim is correct
+                if i == dim:
+                    self.ref[i] += size[i]
+                else:
+                    assert size[i] == self.ref[i]
+        self.outputSize = self.ref
+        # or maybe consider just torch.rand(size) and actually try concat?
     def forward(self, x): # x is a list of multiple tensors
         out = torch.cat(x, dim = self.dim)
         #update json 
-        self.inputSize = [item.shape for item in x]
-        self.outputSize = out.shape
+        #self.inputSize = [item.shape for item in x]
+        #self.outputSize = out.shape
         #self.updateShape()
         return out
 

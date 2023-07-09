@@ -1,21 +1,17 @@
 const qry = (...query) => document.querySelector(...query);
 const qrys = (...query) => document.querySelectorAll(...query);
 
-
 const workspace = qry("#workspace");
-
 
 // while the conf change, modify workspace accordingly
 const workspaceConf = new Proxy({ movementX: 0, movementY: 0, scale: 1 }, {
 	set: (target, key, value) => {
 		target[key] = value;
 
-
 		if (key == "scale") {
 			// apply scale
 			workspace.style["scale"] = `${target.scale}`;
 		}
-
 
 		if (["showingX", "showingY"].includes(key)) {
 			// calc the actually movement
@@ -23,13 +19,11 @@ const workspaceConf = new Proxy({ movementX: 0, movementY: 0, scale: 1 }, {
 			target.movementY = -target.showingY * target.scale;
 		}
 
-
 		if (["movementX", "movementY", "scale"].includes(key)) {
 			// recalc the showing point
 			target.showingX = -target.movementX / target.scale;
 			target.showingY = -target.movementY / target.scale;
 		}
-
 
 		if (["movementX", "movementY", "showingX", "showingY"]) { // i.e., if movement changed
 			workspace.style["translate"] = `${target.movementX}px ${target.movementY}px`;
@@ -40,24 +34,20 @@ const workspaceConf = new Proxy({ movementX: 0, movementY: 0, scale: 1 }, {
 	}
 });
 
-
 // init workspace
 for (let key in workspaceConf) {
 	workspaceConf[key] = workspaceConf[key];
 }
-
 
 // move the workspace while mouse dragging
 qry("#workspaceContainer").addEventListener("mousedown", e => {
 	if (e.target != qry("#workspaceContainer")) return;
 	// prevent unexpected workspace movement (e.g. while blocks being dragged)
 
-
 	const move = e => { // mousemove event
 		workspaceConf.movementX += e.movementX;
 		workspaceConf.movementY += e.movementY;
 	}
-
 
 	document.body.addEventListener("mousemove", move);
 	document.body.addEventListener(
@@ -65,7 +55,6 @@ qry("#workspaceContainer").addEventListener("mousedown", e => {
 		e => document.body.removeEventListener("mousemove", move), { once: true }
 	);
 });
-
 
 // scale the workspace while scrolling
 {
@@ -77,14 +66,11 @@ qry("#workspaceContainer").addEventListener("mousedown", e => {
 		// the "layer" may be any block the cursor's hovering on
 	});
 
-
 	qry("#workspaceContainer").addEventListener("wheel", e => {
 		let oldScale = workspaceConf.scale;
 
-
 		workspaceConf.scale += e.deltaY * -0.001;
 		let newScale = workspaceConf.scale = Math.max(0.05, workspaceConf.scale);
-
 
 		// use mouse's pos as the scaling center
 		let vec = [
@@ -92,13 +78,11 @@ qry("#workspaceContainer").addEventListener("mousedown", e => {
 			mousePosInWsC[1] - workspaceConf.movementY
 		];
 
-
 		let vecScale = (1 - newScale / oldScale);
 		workspaceConf.movementX += vec[0] * vecScale;
 		workspaceConf.movementY += vec[1] * vecScale;
 	}, { passive: true });
 }
-
 
 function createBlock({
 	header,
@@ -109,16 +93,14 @@ function createBlock({
 	let block = document.createElement("div");
 	block.classList.add("block");
 	block.innerHTML = `
-<div class="inputPorts"></div>
-<div class="header">${header || ""}</div>
-<div class="content">${content || ""}</div>
-<div class="outputPorts"></div>
-`;
-
+		<div class="inputPorts"></div>
+		<div class="header">${header || ""}</div>
+		<div class="content">${content || ""}</div>
+		<div class="outputPorts"></div>
+	`;
 
 	block.style["left"] = `${x}px`;
 	block.style["top"] = `${y}px`;
-
 
 	block.children[1].addEventListener("mousedown", e => {
 		const move = e => { // mousemove
@@ -128,7 +110,6 @@ function createBlock({
 			block.style["top"] = `${y}px`;
 		}
 
-
 		document.body.addEventListener("mousemove", move);
 		document.body.addEventListener(
 			"mouseup",
@@ -136,10 +117,8 @@ function createBlock({
 		);
 	});
 
-
 	return block;
 }
-
 
 qry("#addBlock").addEventListener("click", e => {
 	qry("#workspace").appendChild(

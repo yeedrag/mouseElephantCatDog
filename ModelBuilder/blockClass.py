@@ -2,16 +2,19 @@ import torch.nn as nn
 import torch
 # maybe can change inputSize into index, and just search with that!
 class Block(nn.Module):
-    def __init__(self, layer, parents, index, inputSize = [], outputSize = []):
+    def __init__(self, layer, parents, index, args = {}):
         super().__init__()
+        self.mapDict(args)
+        self.args = args
         self.layer = layer
         self.parents = parents # array
         self.index = index
-        if(len(inputSize) == 0 and len(self.parents) != 0):
+        if(len(self.inputSize) == 0 and len(self.parents) != 0):
             self.inputSize = self.layer[parents[0]].outputSize
-        else:
-            self.inputSize = inputSize
-        self.outputSize = outputSize # most should have outputSizes....except maybe convs
+        # most should have outputSizes....except maybe convs
+    def mapDict(self, args): 
+        for k, v in args.items():
+            setattr(self, k, v) # self.k = v
     def initWeight(self):
         raise NotImplementedError
     def updateShape(self):
@@ -27,9 +30,8 @@ class Block(nn.Module):
 # fix tomorrow!!!!!!! its 3 a.m and I should sleep!!!!
 
 class Linear(Block):
-    def __init__(self, layer, parents, index, inputSize = [], outputSize = [], bias = True):
-        super().__init__(layer, parents, index, inputSize, outputSize)
-        self.bias = bias
+    def __init__(self, layer, parents, index, args = {}):
+        super().__init__(layer, parents, index, args)
         assert len(self.inputSize) != 0
         assert len(self.outputSize) != 0
         self.net = nn.Linear(self.inputSize[-1], self.outputSize[-1], bias = self.bias)
@@ -38,9 +40,9 @@ class Linear(Block):
         return self.net(x)
 
 class Activation(Block):
-    def __init__(self, layer, parents, index, inputSize = [], outputSize = [], mode = "ReLU"): # type is reserved lmao
-        super().__init__(layer, parents, index, inputSize, outputSize)
-        match mode:
+    def __init__(self, layer, parents, index, args = {}): # type is reserved lmao
+        super().__init__(layer, parents, index, args)
+        match self.mode:
             case "ReLU":
                 self.net = nn.ReLU()
             case "LeakyReLU":
@@ -56,24 +58,24 @@ class Activation(Block):
         return self.net(x)
     
 class Input(Block):
-    def __init__(self, layer, parents, index, inputSize = [], outputSize = []):
-        super().__init__(layer, parents, index, inputSize, outputSize)
+    def __init__(self, layer, parents, index, args = {}):
+        super().__init__(layer, parents, index, args)
     def forward(self, x):
         #self.updateShape()
         return x
 # We should calculate inputsize and outputsize in __init__ .....
 class Concat(Block):
-    def __init__(self, layer, parents, index, inputSize = [], outputSize = [], dim = 1):
-        super().__init__(layer, parents, index, inputSize, outputSize)
+    def __init__(self, layer, parents, index, args = {}):
+        super().__init__(layer, parents, index, args)
         self.ref = self.layer[parents[0]].outputSize # choose 1st parent as reference
-        self.dim = dim if dim >= 0 else len(self.ref) - abs(dim) # convert to index >= 0
-        assert len(self.ref) > dim and dim > 0 # check if dim is valid
+        self.dim = self.dim if self.dim >= 0 else len(self.ref) - abs(self.dim) # convert to index >= 0 
+        assert len(self.ref) > self.dim and self.dim > 0 # check if dim is valid
         self.inputSize = [self.ref]
         for idx in range(1, len(parents)):
             size = self.layer[idx].outputSize
             self.inputSize.append(size)
             for i in range(0, len(self.ref)): # check if values beside dim is correct
-                if i == dim:
+                if i == self.dim:
                     self.ref[i] += size[i]
                 else:
                     assert size[i] == self.ref[i]
@@ -86,4 +88,11 @@ class Concat(Block):
         #self.outputSize = out.shape
         #self.updateShape()
         return out
+class Conv2d(Block):
+    def __init__(self, layer, parents, index, args = {}):
+        super().__init__(layer, parents, index, args = {})
+        
 
+    def forward(self, x):
+        
+        return self.net(x)

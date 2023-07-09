@@ -5,7 +5,7 @@
         "child": [1, 2],
         "args": {
             "inputSize": [],
-            "outputSize": [32, 2] 
+            "outputSize": [32, 2]
         }
     },
     {
@@ -14,7 +14,8 @@
         "child": [3],
         "args": {
             "inputSize": [],
-            "outputSize": [32, 5]
+            "outputSize": [32, 5],
+            "bias": 1
         }
     },
     {
@@ -23,7 +24,8 @@
         "child": [3],
         "args": {
             "inputSize": [],
-            "outputSize": [32, 5]
+            "outputSize": [32, 5],
+            "bias": 1
         }
     },
     {
@@ -32,7 +34,8 @@
             "child": [4],
             "args": {
                 "inputSize": [],
-                "outputSize": []
+                "outputSize": [],
+                "dim": 1
             }
     },
     {
@@ -41,7 +44,8 @@
         "child": [5],
         "args": {
             "inputSize": [],
-            "outputSize": [32, 1]
+            "outputSize": [32, 1],
+            "bias": 1
         }
     },
     {
@@ -50,7 +54,8 @@
         "child": [],
         "args": {
             "inputSize": [],
-            "outputSize": []
+            "outputSize": [],
+            "mode": "ReLU"
         }
     }
 ]

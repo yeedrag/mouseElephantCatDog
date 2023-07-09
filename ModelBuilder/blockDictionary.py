@@ -1,4 +1,4 @@
-import blockClass as blockClass
+from blocks import blockClass
 callBlock = {
     "Linear": blockClass.Linear, 
     "Activation": blockClass.Activation,

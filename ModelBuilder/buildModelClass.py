@@ -38,7 +38,7 @@ class model(nn.Module):
 		self.topologicalOrder = topologicalOrder
 		self.layersArr = [0] * self.dataLength
 		for idx in self.topologicalOrder:
-			self.layersArr[idx] = callBlock[self.data[idx]["blockName"]](self.data, idx, *self.data[idx]["args"].values())
+			self.layersArr[idx] = callBlock[self.data[idx]["blockName"]](self.layersArr, self.data[idx]["parent"], idx, *self.data[idx]["args"].values())
 		self.layers = nn.ModuleList(self.layersArr)
 		self.layers.cuda() # cuda :)
 	def initWeight(self):

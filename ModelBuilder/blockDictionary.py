@@ -15,7 +15,7 @@ callBlock = {
     "Activation": nonLinearActivation.Activation,
     "Input": utilLayers.Input,
     "Concat": utilLayers.Concat,
-    "Conv": convolutionLayers.ConvDummy,
+    "Conv": convolutionLayers.Conv,
     "Pooling": convolutionLayers.Pooling
 }
 

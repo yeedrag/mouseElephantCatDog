@@ -27,9 +27,10 @@ class Conv(Block): # nn.conv2d
             self.outputHeight = (self.inputSize[2] + (2 * self.padding[0]) - self.dilation[0] * (self.kernelSize[0] - 1) - 1 + self.stride[0]) // self.stride[0]
             self.outputWidth = (self.inputSize[3] + (2 * self.padding[1]) - self.dilation[1] * (self.kernelSize[1] - 1) - 1 + self.stride[1]) // self.stride[1]
             self.outputSize = [self.inputSize[0], self.outputChannels, self.outputHeight, self.outputWidth]
-        self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, self.padding,
-                                    self.dilation, self.groups, self.bias, self.paddingMode)
-
+        #self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, self.padding,
+        #                           self.dilation, self.groups, self.bias, self.paddingMode)
+        self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, 0,
+                                    self.dilation, self.groups, self.bias)
         # 這到底沙小扣
         #別人也是這樣 哈哈
     def forward(self, x):

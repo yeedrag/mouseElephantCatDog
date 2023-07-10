@@ -10,6 +10,7 @@ class Activation(Block):
         }
         '''
         super().__init__(layer, parents, index, args)
+        self.outputSize = self.inputSize
         match self.mode:
             case "ReLU":
                 self.net = nn.ReLU()

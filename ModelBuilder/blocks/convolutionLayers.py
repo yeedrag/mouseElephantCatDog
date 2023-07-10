@@ -5,7 +5,7 @@ class Conv(Block): # nn.conv2d
         '''
             "args": {
             "inputSize": [N, C_in, H, W],
-            "outputSize": [N, C_out, H_out, W_out],
+            "outputSize": [N, C_out, H_out, W_out], # will be calculated
             "outputChannels": int,
             "kernelSize": [height, width],
             "stride": [height, width],
@@ -50,6 +50,41 @@ class ConvDummy(Block): # nn.conv2d, slow!
     def forward(self, x):
         return self.net(x)
 
+class Pooling(Block):
+    def __init__(self, layer, parents, index, args = {}):
+        '''
+            "args": {
+            "inputSize": [N, C_in, H, W],
+            "outputSize": [N, C_out, H_out, W_out], # will be calculated
+            "mode": str, "max", "avg", "adaptiveMax", "adaptiveAvg"
+            "outputSizeAdapt": [H_out, W_out], [] if mode isn't "adaptiveMax" or "adaptiveAvg"
+            "kernelSize": [height, width],
+            "stride": [height, width],
+            "padding": [height, width], no string!
+            "dilation": [height, width],
+        }
+        '''
+        super().__init__(layer, parents, index, args)  
+        print(self.inputSize)
+        if self.mode == "adaptiveMax":
+            self.net = nn.AdaptiveMaxPool2d(self.outputSizeAdapt)
+            self.outputSize = copy.copy(self.inputSize)
+            self.outputSize[-2:] = self.outputSizeAdapt
+        elif self.mode == "adaptiveAvg":
+            self.net = nn.AdaptiveAvgPool2d(self.outputSizeAdapt)
+            self.outputSize = copy.copy(self.inputSize)
+            self.outputSize[-2:] = self.outputSizeAdapt
+        else:
+            if(isinstance(self.padding, list)):
+                self.outputHeight = (self.inputSize[2] + (2 * self.padding[0]) - self.dilation[0] * (self.kernelSize[0] - 1) - 1 + self.stride[0]) // self.stride[0]
+                self.outputWidth = (self.inputSize[3] + (2 * self.padding[1]) - self.dilation[1] * (self.kernelSize[1] - 1) - 1 + self.stride[1]) // self.stride[1]
+                self.outputSize = [self.inputSize[0], self.inputSize[1], self.outputHeight, self.outputWidth]
+            if self.mode == "max":
+                self.net = nn.MaxPool2d(self.kernelSize, self.stride, self.padding, self.dilation)
+            elif self.mode == "avg":
+                self.net = nn.AvgPool2d(self.kernelSize, self.stride, self.padding, self.dilation)
+    def forward(self, x):
+        return self.net(x)
 if __name__ == "__main__":
     # test speed, or maybe put in another place zzz
     start = time.time()

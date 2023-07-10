@@ -17,9 +17,7 @@ class model(nn.Module):
         self.net = nn.Sequential(self.con, nn.ReLU()).cuda()
     def forward(self, x):
         return self.net(x)
-    
-dummyInputCNN = torch.rand([32, 10, 32, 32]).cuda()
-torchModel = model()
-print(torchModel)
-summary(torchModel,dummyInputCNN)
-torch.onnx.export(torchModel,dummyInputCNN,"modelCNNtest.onnx")
+#torchModel = model()
+#print(torchModel)
+#summary(torchModel,dummyInputCNN)
+#torch.onnx.export(torchModel,dummyInputCNN,"modelCNNtest.onnx")

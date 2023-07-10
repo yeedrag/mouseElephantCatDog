@@ -13,7 +13,7 @@
         "parent": [0],
         "child": [2],
         "args": {
-            "inputSize": [32, 10, 32, 32],
+            "inputSize": [],
             "outputSize": [],
             "outputChannels": 100,
             "kernelSize": [3, 3],
@@ -28,11 +28,25 @@
     {
         "blockName": "Activation",
         "parent": [1],
-        "child": [],
+        "child": [3],
         "args": {
             "inputSize": [],
             "outputSize": [],
             "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Pooling",
+        "parent": [2],
+        "child": [],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "max",
+            "kernelSize": [3, 3],
+            "stride": [1, 1],
+            "padding": [0, 0],
+            "dilation": [1, 1]
         }
     }
 ]

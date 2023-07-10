@@ -2,8 +2,6 @@
 	box-sizing: border-box;
 }
 
-
-
 body {
 	background-color: black;
 	color: aliceblue;
@@ -86,7 +84,26 @@ body > div {
 	background-color: #222;
 }
 
-#new-link-line {
-    position: absolute; /* allows to position it anywhere */
-    stroke: #000; /*line color is black*/
+.block > :is(.inputPorts, .outputPorts) {
+	white-space: nowrap;
+}
+
+.block .port {
+	/*
+	 * if the shape or the radius changed,
+	 * modify the redrawTheLine() in ./index.js accordingly 
+	 */
+	--radius: 5px;
+	width: calc(2 * var(--radius));
+	height: calc(2 * var(--radius));
+	border-radius: var(--radius);
+	display: inline-block;
+
+	background-color: #2196f3;
+}
+
+.lineContainer {
+	stroke: hsl(207 90% 80%);
+	stroke-width: 3px;
+	stroke-linecap: round;
 }

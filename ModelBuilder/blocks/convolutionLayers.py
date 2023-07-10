@@ -16,10 +16,11 @@ class Conv(Block): # nn.conv2d
             "paddingMode": str, 'zeros', 'reflect', 'replicate' or 'circular'
         }
         '''
-        super().__init__(layer, parents, index, args)
+        super().__init__(layer, parents, index, args)  
         if(isinstance(self.padding, str)):
             if(self.padding == "same"):
-                self.outputSize = self.inputSize
+                self.outputSize = copy.copy(self.inputSize)
+                self.outputSize[1] = self.outputChannels
             elif(self.padding == "valid"): 
                 self.padding = [0, 0] # no padding
         if(isinstance(self.padding, list)):
@@ -27,11 +28,13 @@ class Conv(Block): # nn.conv2d
             self.outputWidth = (self.inputSize[3] + (2 * self.padding[1]) - self.dilation[1] * (self.kernelSize[1] - 1) - 1 + self.stride[1]) / self.stride[1]
             self.outputSize = [self.inputSize[0], self.outputChannels, self.outputHeight, self.outputWidth]
         self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, self.padding,
-                             self.dilation, self.groups, self.bias, self.paddingMode)
+                                    self.dilation, self.groups, self.bias, self.paddingMode)
+
         # 這到底沙小扣
         #別人也是這樣 哈哈
     def forward(self, x):
-        return self.net(x)
+        out = self.net(x)
+        return out
 class ConvDummy(Block): # nn.conv2d, slow!
     def __init__(self, layer, parents, index, args = {}):
         super().__init__(layer, parents, index, args)

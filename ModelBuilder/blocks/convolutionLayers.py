@@ -35,8 +35,10 @@ class Conv(Block): # nn.conv2d
 class ConvDummy(Block): # nn.conv2d, slow!
     def __init__(self, layer, parents, index, args = {}):
         super().__init__(layer, parents, index, args)
-        self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, self.padding,
-                             self.dilation, self.groups, self.bias, self.paddingMode)
+        #self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, self.padding,
+        #                     self.dilation, self.groups, self.bias, self.paddingMode)
+        # Interestingly, onnx does not support padding lol
+        self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize)
         dummy = torch.rand(self.inputSize)
         dummyOutput = self.net(dummy)
         self.outputSize = list(dummyOutput.shape)

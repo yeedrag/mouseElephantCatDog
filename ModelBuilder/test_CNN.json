@@ -42,11 +42,12 @@
         "args": {
             "inputSize": [],
             "outputSize": [],
-            "mode": "max",
-            "kernelSize": [3, 3],
+            "mode": "avg",
+            "outputSizeAdapt": [0, 0],
+            "kernelSize": [4, 4],
             "stride": [1, 1],
-            "padding": [0, 0],
-            "dilation": [1, 1]
+            "padding": [2, 2],
+            "dilation": [0 ,0]
         }
     }
 ]

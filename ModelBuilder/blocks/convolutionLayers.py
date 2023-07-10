@@ -58,15 +58,15 @@ class Pooling(Block):
             "inputSize": [N, C_in, H, W],
             "outputSize": [N, C_out, H_out, W_out], # will be calculated
             "mode": str, "max", "avg", "adaptiveMax", "adaptiveAvg"
-            "outputSizeAdapt": [H_out, W_out], [] if mode isn't "adaptiveMax" or "adaptiveAvg"
+            "outputSizeAdapt": [H_out, W_out], [0, 0] if mode isn't "adaptiveMax" or "adaptiveAvg"
             "kernelSize": [height, width],
             "stride": [height, width],
             "padding": [height, width], no string!
-            "dilation": [height, width],
+            "dilation": [height, width], [0, 0] if mode isn't max
         }
         '''
         super().__init__(layer, parents, index, args)  
-        print(self.inputSize)
+        # onnx does not support adaptive.... find other way to global pooling....
         if self.mode == "adaptiveMax":
             self.net = nn.AdaptiveMaxPool2d(self.outputSizeAdapt)
             self.outputSize = copy.copy(self.inputSize)
@@ -83,7 +83,8 @@ class Pooling(Block):
             if self.mode == "max":
                 self.net = nn.MaxPool2d(self.kernelSize, self.stride, self.padding, self.dilation)
             elif self.mode == "avg":
-                self.net = nn.AvgPool2d(self.kernelSize, self.stride, self.padding, self.dilation)
+                # avg pool doens't have dilation for some reason
+                self.net = nn.AvgPool2d(self.kernelSize, self.stride, self.padding) 
     def forward(self, x):
         return self.net(x)
 if __name__ == "__main__":

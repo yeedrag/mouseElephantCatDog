@@ -29,7 +29,7 @@ class Block(nn.Module):
 # Super important! change from searching in data to searching in xArray instead!!!!
 # Or else for concat, relu, conv.... with no set output will assert error for self.inputsize != 0
 # fix tomorrow!!!!!!! its 3 a.m and I should sleep!!!!
-
+'''
 class Linear(Block):
     def __init__(self, layer, parents, index, args = {}):
         super().__init__(layer, parents, index, args)
@@ -39,6 +39,7 @@ class Linear(Block):
     def forward(self, x):
         #self.updateShape()
         return self.net(x)
+
 
 class Activation(Block):
     def __init__(self, layer, parents, index, args = {}): # type is reserved lmao
@@ -57,13 +58,14 @@ class Activation(Block):
         #self.updateShape()
     def forward(self, x):
         return self.net(x)
-    
+
 class Input(Block):
     def __init__(self, layer, parents, index, args = {}):
         super().__init__(layer, parents, index, args)
     def forward(self, x):
         #self.updateShape()
         return x
+
 # We should calculate inputsize and outputsize in __init__ .....
 class Concat(Block):
     def __init__(self, layer, parents, index, args = {}):
@@ -102,10 +104,10 @@ class concatDummy(Block):
     def forward(self, x): # x is a list of multiple tensors
         out = torch.cat(x, dim = self.dim)
         return out
+'''
 class Conv2d(Block):
     def __init__(self, layer, parents, index, args = {}):
         super().__init__(layer, parents, index, args = {})
-        
 
     def forward(self, x):
         

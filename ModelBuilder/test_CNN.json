@@ -1,0 +1,38 @@
+[
+    {
+        "blockName": "Input",
+        "parent": [],
+        "child": [1],
+        "args": {
+            "inputSize": [],
+            "outputSize": [32, 10, 32, 32]
+        }
+    },
+    {
+        "blockName": "Conv",
+        "parent": [0],
+        "child": [2],
+        "args": {
+            "inputSize": [32, 10, 32, 32],
+            "outputSize": [],
+            "outputChannels": 100,
+            "kernelSize": [3, 3],
+            "stride": [1, 1],
+            "padding": "same",
+            "dilation": [1, 1],
+            "groups": 1,
+            "bias": true,
+            "paddingMode": "zeros"
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [1],
+        "child": [],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    }
+]

@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+import copy
 # maybe can change inputSize into index, and just search with that!
 class Block(nn.Module):
     def __init__(self, layer, parents, index, args = {}):
@@ -66,8 +67,9 @@ class Input(Block):
 # We should calculate inputsize and outputsize in __init__ .....
 class Concat(Block):
     def __init__(self, layer, parents, index, args = {}):
+        # Required args: dim
         super().__init__(layer, parents, index, args)
-        self.ref = self.layer[parents[0]].outputSize # choose 1st parent as reference
+        self.ref = copy.copy(self.layer[parents[0]].outputSize) # choose 1st parent as reference, I hate python
         self.dim = self.dim if self.dim >= 0 else len(self.ref) - abs(self.dim) # convert to index >= 0 
         assert len(self.ref) > self.dim and self.dim > 0 # check if dim is valid
         self.inputSize = [self.ref]
@@ -79,7 +81,7 @@ class Concat(Block):
                     self.ref[i] += size[i]
                 else:
                     assert size[i] == self.ref[i]
-        self.outputSize = self.ref
+        self.outputSize = copy.copy(self.ref)
         # or maybe consider just torch.rand(size) and actually try concat?
     def forward(self, x): # x is a list of multiple tensors
         out = torch.cat(x, dim = self.dim)
@@ -87,6 +89,18 @@ class Concat(Block):
         #self.inputSize = [item.shape for item in x]
         #self.outputSize = out.shape
         #self.updateShape()
+        return out
+class concatDummy(Block):
+    def __init__(self, layer, parents, index, args = {}):
+        # Required args: dim
+        super().__init__(layer, parents, index, args)
+        self.inputSize  = [layer[parent].outputSize for parent in parents]
+        Dummies = [torch.rand(sz) for sz in self.inputSize]
+        dummyOutput = torch.cat(Dummies, dim = self.dim)
+        self.outputSize = list(dummyOutput.shape)
+        # or maybe consider just torch.rand(size) and actually try concat?
+    def forward(self, x): # x is a list of multiple tensors
+        out = torch.cat(x, dim = self.dim)
         return out
 class Conv2d(Block):
     def __init__(self, layer, parents, index, args = {}):

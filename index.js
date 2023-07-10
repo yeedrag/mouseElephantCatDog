@@ -62,8 +62,8 @@ qry("#workspaceContainer").addEventListener("mousedown", e => {
 	qry("#workspaceContainer").addEventListener("mousemove", e => {
 		let wsCBox = workspaceContainer.getBoundingClientRect();
 		mousePosInWsC = [e.x - wsCBox.x, e.y - wsCBox.y];
-		// we can't just set that to [e.layerX, e.layerY] 'cuz
-		// the "layer" may be any block the cursor's hovering on
+			// we can't just set that to [e.layerX, e.layerY] 'cuz
+			// the "layer" may be any block the cursor's hovering on
 	});
 
 	qry("#workspaceContainer").addEventListener("wheel", e => {
@@ -108,6 +108,8 @@ function createBlock({
 			y += e.movementY / workspaceConf.scale;
 			block.style["left"] = `${x}px`;
 			block.style["top"] = `${y}px`;
+
+			block.dispatchEvent(new CustomEvent("redrawLines"));
 		}
 
 		document.body.addEventListener("mousemove", move);
@@ -174,7 +176,102 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 		}
 
 		// now draw a line for the two blocks
-		console.log(block1, block2); // to do
+		const redrawTheLine = (() => {
+			const [port1, port2] = [document.createElement("div"), document.createElement("div")];
+			[port1, port2].forEach(p => p.classList.add("port"));
+				// ref: ./index.css, block .port
+				// each port is a circle with radius equal to 5px.
+			block1.querySelector(".outputPorts").appendChild(port1);
+			block2.querySelector(".inputPorts").appendChild(port2);
+
+			let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+				// don't use doc~.createElement("svg" or "svg:svg") cuz that only
+				// creates an HTML element with that tag name. The result will be 
+				// an instance of HTMLUnknownElement, not a SVGElement.
+
+			qry("#workspace").appendChild(svg);
+
+			const
+				abs = value => value > 0 ? value : -value,
+				min = (...values) => Math.min(...values),
+				max = (...values) => Math.max(...values);
+
+			return () => {
+				console.log("Drawing the line");
+				const [c1, c2] = [port1, port2].map(port => {
+					// c for the center of a port, 
+					// relative to the workspace center (anchor)
+
+					const anchor = wsDiv.getBoundingClientRect();
+					const box = port.getBoundingClientRect();
+					const
+						x = (box.x + box.width / 2 - anchor.x) / workspaceConf.scale,
+						y = (box.y + box.height / 2 - anchor.y) / workspaceConf.scale;
+					return {x, y};
+				});
+
+				const area = {
+					up: min(c1.y, c2.y), // prevent using top as it's a keyword
+					down: max(c1.y, c2.y),
+					left: min(c1.x, c2.x),
+					right: max(c1.x, c2.x),
+					padding: 5
+				};
+
+				Object.assign(area, {
+					c1: { x: c1.x - area.left, y: c1.y - area.up },
+					c2: { x: c2.x - area.left, y: c2.y - area.up },
+
+					// o means all or outer
+					oUp: area.up - area.padding,
+					oDown: area.down + area.padding,
+					oLeft: area.left - area.padding,
+					oRight: area.right + area.padding
+						// things will be o right~
+				});
+
+				Object.assign(area, {
+					oC1: { x: c1.x - area.oLeft, y: c1.y - area.oUp },
+					oC2: { x: c2.x - area.oLeft, y: c2.y - area.oUp }
+				});
+
+				Object.entries({
+					"class": `lineContainer`,
+					width: `${area.oRight - area.oLeft}`,
+					height: `${area.oDown - area.oUp}`,
+					style: `
+						position: absolute;
+						left: ${area.left - area.padding}px;
+						top: ${area.up - area.padding}px;
+						pointer-events: none;
+					`
+				}).forEach(([attr, value]) => svg.setAttribute(attr, value));
+
+				const setInnerXML = function(xml) {
+					// ref: https://stackoverflow.com/a/9724151/10596093
+					let tmpDoc = new DOMParser().parseFromString(xml, "application/xml");
+					this.appendChild(
+						this.outerDocument.adaptNode(tmpDoc.documentElement, true)
+					);
+				};
+
+				svg.innerHTML = `
+					<line 
+						x1="${area.oC1.x}"
+						y1="${area.oC1.y}"
+						x2="${area.oC2.x}"
+						y2="${area.oC2.y}"
+					/>
+				`;
+			}
+		})();
+
+		[block1, block2].forEach(block => {
+			block.addEventListener("redrawLines", redrawTheLine);
+			block.dispatchEvent(new CustomEvent("redrawLines"));
+				// after the ports added, other ports are sure to move,
+				// so the other lines need to be redrawn as this line does.
+		});
 
 		prepareForAnotherProcess();
 	};

@@ -51,25 +51,30 @@ class concatDummy(Block):
         out = torch.cat(x, dim = self.dim)
         return out
 
-class flatten(Block):
+class Flatten(Block):
     def __init__(self, layer, parents, index, args = {}):
         '''
             "args": {
             "inputSize": [],
             "outputSize": [],
-            "start_dim": int(initial 1),
-            "end_dim": int(initial -1)
+            "startDim": int (default 1),
+            "endDim": int (default -1)
         }
         '''
         super().__init__(layer, parents, index, args)
-        self.inputSize  = layer[parents[0]].outputSize
-        for i in range(0,self.start_dim):
+        #self.inputSize  = layer[parents[0]].outputSize
+        self.endDim = self.endDim if self.endDim >= 0 else len(self.inputSize) - abs(self.endDim)
+        for i in range(0,self.startDim): 
             self.outputSize.append(self.inputSize[i])
         self.outputSize.append(1)
-        for i in range(self.start_dim,self.end_dim+1):
+        for i in range(self.startDim, self.endDim + 1):
             self.outputSize[-1] *= self.inputSize[i]
-        for i in range(self.end_dim+1,len(self.inputSize)):
-            self.outputSize.append(self.inputSize[i],)
+        for i in range(self.endDim + 1, len(self.inputSize)):
+            self.outputSize.append(self.inputSize[i])
     def forward(self, x):
-        out = torch.flatten(x,start_dim = self.start_dim, end_dim = self.end_dim)
+        out = torch.flatten(x, self.startDim, self.endDim)
         return out
+if __name__ == "__main__":
+    flat = Flatten(1 ,1, 1, {"inputSize": [32, 100, 30, 10], "outputSize": [], "startDim": 1, "endDim": -2})
+    dum = torch.rand([32, 100, 30, 10])
+    out = flat(dum)

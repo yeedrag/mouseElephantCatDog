@@ -11,7 +11,8 @@ class Dropout(Block):
         }
         '''
         super().__init__(layer, parents, index, args)
-        self.net = nn.Dropout(self.p, self.implace)
+        self.outputSize = self.inputSize
+        self.net = nn.Dropout(self.p, self.inplace)
     def forward(self,x):
         return self.net(x)
 

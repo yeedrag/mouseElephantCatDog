@@ -15,5 +15,6 @@ class Linear(Block):
         assert len(self.outputSize) != 0
         self.net = nn.Linear(self.inputSize[-1], self.outputSize[-1], bias = self.bias) 
     def forward(self, x):
+        #print(self.index, list(x.shape), self.inputSize)
         #self.updateShape()
         return self.net(x)

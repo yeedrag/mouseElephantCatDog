@@ -16,6 +16,7 @@ callBlock = {
     "Input": utilLayers.Input,
     "Concat": utilLayers.Concat,
     "Conv": convolutionLayers.Conv,
-    "Pooling": convolutionLayers.Pooling
+    "Pooling": convolutionLayers.Pooling,
+    "Flatten": utilLayers.Flatten
 }
 

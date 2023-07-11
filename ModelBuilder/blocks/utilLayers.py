@@ -71,10 +71,12 @@ class Flatten(Block):
             self.outputSize[-1] *= self.inputSize[i]
         for i in range(self.endDim + 1, len(self.inputSize)):
             self.outputSize.append(self.inputSize[i])
+        self.net = nn.Flatten(self.startDim, self.endDim)
     def forward(self, x):
-        out = torch.flatten(x, self.startDim, self.endDim)
-        return out
+        #print(self.index, list(x.shape), self.inputSize)
+        return self.net(x)
 if __name__ == "__main__":
     flat = Flatten(1 ,1, 1, {"inputSize": [32, 100, 30, 10], "outputSize": [], "startDim": 1, "endDim": -2})
     dum = torch.rand([32, 100, 30, 10])
     out = flat(dum)
+    print(out.shape)

@@ -29,12 +29,17 @@ class Conv(Block): # nn.conv2d
             self.outputSize = [self.inputSize[0], self.outputChannels, self.outputHeight, self.outputWidth]
         #self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, self.padding,
         #                           self.dilation, self.groups, self.bias, self.paddingMode)
+
+        # can only use valid if want onnx to work, I set to 0 now will error if pad = "same"
         self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, 0,
                                     self.dilation, self.groups, self.bias)
         # 這到底沙小扣
         #別人也是這樣 哈哈
     def forward(self, x):
+        #print(self.index, self.inputSize, list(x.shape))
         out = self.net(x)
+        #print(self.index, self.outputSize, list(out.shape))
+        #assert(self.outputSize == list(out.shape))
         return out
 class ConvDummy(Block): # nn.conv2d, slow!
     def __init__(self, layer, parents, index, args = {}):
@@ -62,7 +67,7 @@ class Pooling(Block):
             "kernelSize": [height, width],
             "stride": [height, width],
             "padding": [height, width], no string!
-            "dilation": [height, width], [0, 0] if mode isn't max
+            "dilation": [height, width], [1, 1] if mode isn't max
         }
         '''
         super().__init__(layer, parents, index, args)  
@@ -86,6 +91,9 @@ class Pooling(Block):
                 # avg pool doens't have dilation for some reason
                 self.net = nn.AvgPool2d(self.kernelSize, self.stride, self.padding) 
     def forward(self, x):
+        #print(self.index, list(x.shape), self.inputSize)
+        out = self.net(x)
+        #print(self.index, self.outputSize, list(out.shape))
         return self.net(x)
 if __name__ == "__main__":
     # test speed, or maybe put in another place zzz

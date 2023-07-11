@@ -12,6 +12,8 @@ class Block(nn.Module):
         self.index = index
         if(len(self.inputSize) == 0 and len(self.parents) != 0):
             self.inputSize = self.layer[parents[0]].outputSize
+        if(len(self.outputSize) == 0):
+            self.outputSize = self.inputSize # still should clarify in indiv blocks
         # most should have outputSizes....except maybe convs
     def mapDict(self, args): 
         for k, v in args.items():

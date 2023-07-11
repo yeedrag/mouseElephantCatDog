@@ -3,6 +3,7 @@ from blockClass import *
 class Input(Block):
     def __init__(self, layer, parents, index, args = {}):
         super().__init__(layer, parents, index, args)
+        self.outputSize = self.inputSize
     def forward(self, x):
         #self.updateShape()
         return x

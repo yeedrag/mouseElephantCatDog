@@ -21,6 +21,18 @@ class Conv(Block): # nn.conv2d
             if(self.padding == "same"):
                 self.outputSize = copy.copy(self.inputSize)
                 self.outputSize[1] = self.outputChannels
+
+                # work around for onnx export problem, https://github.com/pytorch/pytorch/issues/68880
+                # solve is from tensorflow. https://discuss.pytorch.org/t/same-padding-equivalent-in-pytorch/85121/4
+                if(self.inputSize[2] % self.stride[0] == 0):
+                    padAlongHeight = max(self.kernelSize[0] - self.stride[0], 0)
+                else:
+                    padAlongHeight = max(self.kernelSize[0] - (self.inputSize[2] % self.stride[0]), 0)
+                if(self.inputSize[3] % self.stride[1] == 0):
+                    padAlongWidth = max(self.kernelSize[1] - self.stride[1], 0)
+                else:
+                    padAlongWidth = max(self.kernelSize[1] - (self.inputSize[3] % self.stride[1]), 0)
+                self.padding = [padAlongHeight, padAlongWidth]
             elif(self.padding == "valid"): 
                 self.padding = [0, 0] # no padding
         if(isinstance(self.padding, list)):
@@ -29,9 +41,10 @@ class Conv(Block): # nn.conv2d
             self.outputSize = [self.inputSize[0], self.outputChannels, self.outputHeight, self.outputWidth]
         #self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, self.padding,
         #                           self.dilation, self.groups, self.bias, self.paddingMode)
-
-        # can only use valid if want onnx to work, I set to 0 now will error if pad = "same"
-        self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, 0,
+        if(isinstance(self.padding, str) and self.padding == "same"):
+            assert self.outputSize == self.inputSize
+        # I set to 0 now will error if pad = "same"
+        self.net = nn.Conv2d(self.inputSize[1], self.outputChannels, self.kernelSize, self.stride, self.padding,
                                     self.dilation, self.groups, self.bias)
         # 這到底沙小扣
         #別人也是這樣 哈哈

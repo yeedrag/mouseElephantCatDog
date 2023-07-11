@@ -18,7 +18,7 @@
             "outputChannels": 100,
             "kernelSize": [3, 3],
             "stride": [1, 1],
-            "padding": "valid",
+            "padding": "same",
             "dilation": [1, 1],
             "groups": 1,
             "bias": true,

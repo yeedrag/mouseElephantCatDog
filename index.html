@@ -15,9 +15,29 @@
 				Not Implemented
 			</div>
 			<div id="choices">
-				Not Implemented
+				<p>Choose block type</p>
+				<select id="blockType">
+					<optgroup label="input">
+						<option value="input">Input</option>
+					</optgroup>
+					<optgroup label="Linear">
+						<option value="Linear">Linear</option>
+					</optgroup>
+					<optgroup label="Activation">
+						<option value="ReLU">ReLU</option>
+						<option value="leakyReLU">LeakyReLU</option>
+						<option value="Sigmoid">Sigmoid</option>
+						<option value="Tanh">Tanh</option>
+					</optgroup>
+					<optgroup label="Concat">
+						<option value="Concat">Concat</option>
+					</optgroup>
+				</select>
 				
 				<button id="addBlock">Add Block</button>
+
+				<hr>
+
 				<button id="addLine">Connect Blocks</button>
 			</div>
 		</div>

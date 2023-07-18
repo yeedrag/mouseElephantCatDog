@@ -122,13 +122,36 @@ function createBlock({
 	return block;
 }
 
+//create block not working will fix Jul18 1749
 qry("#addBlock").addEventListener("click", e => {
-	qry("#workspace").appendChild(
-		createBlock({
-			header: document.getElementById("blockType").value,
-			content: document.getElementById("blockType").value
-		})
-	);
+	let header = document.getElementById("blockType").value, content = "";
+    switch (header) {
+        case "Input":
+            content = "outputSize:";
+            break;
+		case "Linear":
+            content = "outputSize:, bias:";
+            break;
+		case "ReLU":
+            content = "mode:";
+            break;
+		case "leakyReLU":
+            content = "mode:";
+            break;
+		case "Sigmoid":
+            content = "mode:";
+            break;
+		case "Tanh":
+            content = "mode:";
+            break;
+		case "Concat":
+            content = "outputSize:, dim:";
+            break;	
+        default:
+            content = " ";
+            break;
+    }
+    qry("#workspace").appendChild(createBlock({ header, content }));
 });
 
 // create a Input block

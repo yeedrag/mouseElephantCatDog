@@ -63,5 +63,6 @@ def modelBuilder(path): # should be able to choose output method
 		print(torchModel)
 		summary(torchModel,dummyInputCNN)
 		torch.onnx.export(torchModel,dummyInputCNN,"alexNet.onnx")
+		# DONT COMMIT BIG FILES!!!
 path = os.path.join('./alexNet.json')
 modelBuilder(path)

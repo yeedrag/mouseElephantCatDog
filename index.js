@@ -117,7 +117,7 @@ function createBlock({
 			"mouseup",
 			e => document.body.removeEventListener("mousemove", move), { once: true }
 		);
-	});
+	}); 
 
 	return block;
 }
@@ -125,8 +125,8 @@ function createBlock({
 qry("#addBlock").addEventListener("click", e => {
 	qry("#workspace").appendChild(
 		createBlock({
-			header: prompt("Please write some HTML for the header"),
-			content: prompt("Please write some HTML for the content")
+			header: document.getElementById("blockType").value,
+			content: document.getElementById("blockType").value
 		})
 	);
 });

@@ -3,58 +3,122 @@ const qrys = (...query) => document.querySelectorAll(...query);
 
 const workspace = qry("#workspace");
 
+//block types
+let blockTypes = {
+	"Input": { // 這裡放 default value
+		"parent": [],
+		"child": [1, 2],
+		"args": {
+			"inputSize": [32, 2],				
+			"outputSize": []
+		}
+	},	
+	"Linear": { // 這裡放 default value
+		"parent": [14],
+		"child": [16],
+		"args": {
+			"inputSize": [],
+			"outputSize": [32, 4096],
+			"bias": 1
+			}
+	},
+	"ReLu": {  // 這裡放 default value
+		"parent": [15],
+		"child": [17],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+		}
+	},
+	"leakyReLU": {
+		"parent": [15],
+		"child": [17],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+		}
+	},
+	"Sigmoid": {
+		"parent": [15],
+		"child": [17],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+		}
+	},
+	"Tanh": {
+		"parent": [15],
+		"child": [17],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+		}
+	},
+	"Concat":{
+		"parent": [1, 2],
+		"child": [4],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+			"dim": 1
+		}
+	}
+}
+
+
+
 // while the conf change, modify workspace accordingly
 const workspaceConf = new Proxy({ movementX: 0, movementY: 0, scale: 1 }, {
-	set: (target, key, value) => {
-		target[key] = value;
+		set: (target, key, value) => {
+			target[key] = value;
 
-		if (key == "scale") {
-			// apply scale
-			workspace.style["scale"] = `${target.scale}`;
+			if (key == "scale") {
+				// apply scale
+				workspace.style["scale"] = `${target.scale}`;
+			}
+
+			if (["showingX", "showingY"].includes(key)) {
+				// calc the actually movement
+				target.movementX = -target.showingX * target.scale;
+				target.movementY = -target.showingY * target.scale;
+			}
+
+			if (["movementX", "movementY", "scale"].includes(key)) {
+				// recalc the showing point
+				target.showingX = -target.movementX / target.scale;
+				target.showingY = -target.movementY / target.scale;
+			}
+
+			if (["movementX", "movementY", "showingX", "showingY"]) { // i.e., if movement changed
+				workspace.style["translate"] = `${target.movementX}px ${target.movementY}px`;
+				// note: the "translate"d amounts seem not to be affected by "scale"
+			}
+
+			return true; // set handler should return true if success.
 		}
+	});
 
-		if (["showingX", "showingY"].includes(key)) {
-			// calc the actually movement
-			target.movementX = -target.showingX * target.scale;
-			target.movementY = -target.showingY * target.scale;
-		}
-
-		if (["movementX", "movementY", "scale"].includes(key)) {
-			// recalc the showing point
-			target.showingX = -target.movementX / target.scale;
-			target.showingY = -target.movementY / target.scale;
-		}
-
-		if (["movementX", "movementY", "showingX", "showingY"]) { // i.e., if movement changed
-			workspace.style["translate"] = `${target.movementX}px ${target.movementY}px`;
-			// note: the "translate"d amounts seem not to be affected by "scale"
-		}
-
-		return true; // set handler should return true if success.
+	// init workspace
+	for(let key in workspaceConf) {
+		workspaceConf[key] = workspaceConf[key];
 	}
-});
-
-// init workspace
-for (let key in workspaceConf) {
-	workspaceConf[key] = workspaceConf[key];
-}
 
 // move the workspace while mouse dragging
 qry("#workspaceContainer").addEventListener("mousedown", e => {
-	if (e.target != qry("#workspaceContainer")) return;
-	// prevent unexpected workspace movement (e.g. while blocks being dragged)
+		if (e.target != qry("#workspaceContainer")) return;
+		// prevent unexpected workspace movement (e.g. while blocks being dragged)
 
-	const move = e => { // mousemove event
-		workspaceConf.movementX += e.movementX;
-		workspaceConf.movementY += e.movementY;
-	}
+		const move = e => { // mousemove event
+			workspaceConf.movementX += e.movementX;
+			workspaceConf.movementY += e.movementY;
+		}
 
-	document.body.addEventListener("mousemove", move);
-	document.body.addEventListener(
-		"mouseup",
-		e => document.body.removeEventListener("mousemove", move), { once: true }
-	);
-});
+		document.body.addEventListener("mousemove", move);
+		document.body.addEventListener(
+			"mouseup",
+			e => document.body.removeEventListener("mousemove", move), { once: true }
+		);
+	});
 
 // scale the workspace while scrolling
 {
@@ -62,8 +126,8 @@ qry("#workspaceContainer").addEventListener("mousedown", e => {
 	qry("#workspaceContainer").addEventListener("mousemove", e => {
 		let wsCBox = workspaceContainer.getBoundingClientRect();
 		mousePosInWsC = [e.x - wsCBox.x, e.y - wsCBox.y];
-			// we can't just set that to [e.layerX, e.layerY] 'cuz
-			// the "layer" may be any block the cursor's hovering on
+		// we can't just set that to [e.layerX, e.layerY] 'cuz
+		// the "layer" may be any block the cursor's hovering on
 	});
 
 	qry("#workspaceContainer").addEventListener("wheel", e => {
@@ -92,6 +156,7 @@ function createBlock({
 	// todo: change this element to import and export to json files
 	let block = document.createElement("div");
 	block.classList.add("block");
+	//<div class="content"><pre id = "json">${content || ""}</pre></div> to format json
 	block.innerHTML = `
 		<div class="inputPorts"></div>
 		<div class="header">${header || ""}</div>
@@ -117,41 +182,16 @@ function createBlock({
 			"mouseup",
 			e => document.body.removeEventListener("mousemove", move), { once: true }
 		);
-	}); 
+	});
 
 	return block;
 }
 
-//create block not working will fix Jul18 1749
+
 qry("#addBlock").addEventListener("click", e => {
-	let header = document.getElementById("blockType").value, content = "";
-    switch (header) {
-        case "Input":
-            content = "outputSize:";
-            break;
-		case "Linear":
-            content = "outputSize:, bias:";
-            break;
-		case "ReLU":
-            content = "mode:";
-            break;
-		case "leakyReLU":
-            content = "mode:";
-            break;
-		case "Sigmoid":
-            content = "mode:";
-            break;
-		case "Tanh":
-            content = "mode:";
-            break;
-		case "Concat":
-            content = "outputSize:, dim:";
-            break;	
-        default:
-            content = " ";
-            break;
-    }
-    qry("#workspace").appendChild(createBlock({ header, content }));
+	let typeName = document.getElementById("blockType").value, content = "";
+	content = JSON.stringify(blockTypes[typeName], null);
+	qry("#workspace").appendChild(createBlock({ header: typeName, content }));
 });
 
 // create a Input block
@@ -165,7 +205,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 		// "process" here and below means the period while connecting two blocks
 
 		addLineBtn.innerHTML = `Connect Blocks`;
-		addLineBtn.addEventListener("click", addLine, {once: true});
+		addLineBtn.addEventListener("click", addLine, { once: true });
 	};
 
 	const addLine = async e => { // click event
@@ -177,24 +217,24 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 		addLineBtn.addEventListener("click", e => {
 			addLineProcess.abort();
 			prepareForAnotherProcess();
-		}, {once: true});
+		}, { once: true });
 
 		// userSelectedABlock() is defined later
-		let block1 = await userSelectedABlock({signal: addLineProcess.signal})
-			.catch(err => {	
-				if(err.name != "aborted")
+		let block1 = await userSelectedABlock({ signal: addLineProcess.signal })
+			.catch(err => {
+				if (err.name != "aborted")
 					console.log("Error: ", err);
 			});
-		let block2 = await userSelectedABlock({signal: addLineProcess.signal})
+		let block2 = await userSelectedABlock({ signal: addLineProcess.signal })
 			.catch(err => {
-				if(err.name != "aborted")
+				if (err.name != "aborted")
 					console.log("Error: ", err);
 			});
 
-		if(addLineProcess.signal.aborted) return prepareForAnotherProcess();
-		if(block1 == block2){
+		if (addLineProcess.signal.aborted) return prepareForAnotherProcess();
+		if (block1 == block2) {
 			alert("You can't connect a block to itself!"),
-			prepareForAnotherProcess();
+				prepareForAnotherProcess();
 			return;
 		}
 
@@ -202,15 +242,15 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 		const redrawTheLine = (() => {
 			const [port1, port2] = [document.createElement("div"), document.createElement("div")];
 			[port1, port2].forEach(p => p.classList.add("port"));
-				// ref: ./index.css, block .port
-				// each port is a circle with radius equal to 5px.
+			// ref: ./index.css, block .port
+			// each port is a circle with radius equal to 5px.
 			block1.querySelector(".outputPorts").appendChild(port1);
 			block2.querySelector(".inputPorts").appendChild(port2);
 
 			let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-				// don't use doc~.createElement("svg" or "svg:svg") cuz that only
-				// creates an HTML element with that tag name. The result will be 
-				// an instance of HTMLUnknownElement, not a SVGElement.
+			// don't use doc~.createElement("svg" or "svg:svg") cuz that only
+			// creates an HTML element with that tag name. The result will be 
+			// an instance of HTMLUnknownElement, not a SVGElement.
 
 			qry("#workspace").appendChild(svg);
 
@@ -230,7 +270,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 					const
 						x = (box.x + box.width / 2 - anchor.x) / workspaceConf.scale,
 						y = (box.y + box.height / 2 - anchor.y) / workspaceConf.scale;
-					return {x, y};
+					return { x, y };
 				});
 
 				const area = {
@@ -250,7 +290,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 					oDown: area.down + area.padding,
 					oLeft: area.left - area.padding,
 					oRight: area.right + area.padding
-						// things will be o right~
+					// things will be o right~
 				});
 
 				Object.assign(area, {
@@ -270,7 +310,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 					`
 				}).forEach(([attr, value]) => svg.setAttribute(attr, value));
 
-				const setInnerXML = function(xml) {
+				const setInnerXML = function (xml) {
 					// ref: https://stackoverflow.com/a/9724151/10596093
 					let tmpDoc = new DOMParser().parseFromString(xml, "application/xml");
 					this.appendChild(
@@ -292,8 +332,8 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 		[block1, block2].forEach(block => {
 			block.addEventListener("redrawLines", redrawTheLine);
 			block.dispatchEvent(new CustomEvent("redrawLines"));
-				// after the ports added, other ports are sure to move,
-				// so the other lines need to be redrawn as this line does.
+			// after the ports added, other ports are sure to move,
+			// so the other lines need to be redrawn as this line does.
 		});
 
 		prepareForAnotherProcess();
@@ -301,16 +341,16 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 
 	prepareForAnotherProcess();
 
-	const userSelectedABlock = ({signal: signal}) => {
+	const userSelectedABlock = ({ signal: signal }) => {
 		return new Promise((resolve, reject) => {
-			if(signal.aborted) fail({name: "aborted"});
-			signal.addEventListener("abort", e => reject({name: "aborted"}), {once: true});
+			if (signal.aborted) fail({ name: "aborted" });
+			signal.addEventListener("abort", e => reject({ name: "aborted" }), { once: true });
 
 			const findTheBlock = e => { // click event
 				// finding block
 				let tmp = e.target;
-				while(!tmp.classList.contains("block")){
-					if(tmp == wsDiv){
+				while (!tmp.classList.contains("block")) {
+					if (tmp == wsDiv) {
 						listenToClick();
 						alert("Please click on a block");
 						return;
@@ -324,7 +364,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 			const listenToClick = () => wsDiv.addEventListener(
 				"click",
 				findTheBlock,
-				{signal: signal, once: true}
+				{ signal: signal, once: true }
 			);
 
 			listenToClick();

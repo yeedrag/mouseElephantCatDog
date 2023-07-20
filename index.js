@@ -69,7 +69,7 @@ qry("#workspaceContainer").addEventListener("mousedown", e => {
 	qry("#workspaceContainer").addEventListener("wheel", e => {
 		let oldScale = workspaceConf.scale;
 
-		workspaceConf.scale += e.deltaY * -0.001;
+		workspaceConf.scale *= 3 ** (e.deltaY * -0.001);
 		let newScale = workspaceConf.scale = Math.max(0.05, workspaceConf.scale);
 
 		// use mouse's pos as the scaling center

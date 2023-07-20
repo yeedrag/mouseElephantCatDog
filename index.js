@@ -225,11 +225,14 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 				if (err.name != "aborted")
 					console.log("Error: ", err);
 			});
+		block1.classList.add("selected");
+
 		let block2 = await userSelectedABlock({ signal: addLineProcess.signal })
 			.catch(err => {
 				if (err.name != "aborted")
 					console.log("Error: ", err);
 			});
+		block1.classList.remove("selected");
 
 		if (addLineProcess.signal.aborted) return prepareForAnotherProcess();
 		if (block1 == block2) {

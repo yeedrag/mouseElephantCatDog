@@ -22,7 +22,7 @@ let blockTypes = {
 			"bias": 1
 			}
 	},
-	"ReLu": {  // 這裡放 default value
+	"ReLU": {  // 這裡放 default value
 		"parent": [15],
 		"child": [17],
 		"args": {

@@ -1,0 +1,276 @@
+[
+    {
+        "blockName": "Input",
+        "parent": [],
+        "child": [1],
+        "args": {
+            "inputSize": [32, 3, 224, 224],
+            "outputSize": []
+        }
+    },
+    {
+        "blockName": "Conv",
+        "parent": [0],
+        "child": [2],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "outputChannels": 96,
+            "kernelSize": [11, 11],
+            "stride": [4, 4],
+            "padding": [1, 1],
+            "dilation": [1, 1],
+            "groups": 1,
+            "bias": true,
+            "paddingMode": "zeros"
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [1],
+        "child": [3],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Pooling",
+        "parent": [2],
+        "child": [4],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "max",
+            "outputSizeAdapt": [0, 0],
+            "kernelSize": [3, 3],
+            "stride": [2, 2],
+            "padding": [0, 0],
+            "dilation": [1, 1] 
+
+        }
+    },
+    {
+        "blockName": "Conv",
+        "parent": [3],
+        "child": [5],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "outputChannels": 256,
+            "kernelSize": [3, 3],
+            "stride": [1, 1],
+            "padding": [2, 2],
+            "dilation": [1, 1],
+            "groups": 1,
+            "bias": true,
+            "paddingMode": "zeros"
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [4],
+        "child": [6],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Pooling",
+        "parent": [5],
+        "child": [7],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "max",
+            "outputSizeAdapt": [0, 0],
+            "kernelSize": [3, 3],
+            "stride": [2, 2],
+            "padding": [0, 0],
+            "dilation": [1, 1] 
+
+        }
+    },
+    {
+        "blockName": "Conv",
+        "parent": [6],
+        "child": [8],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "outputChannels": 384,
+            "kernelSize": [3, 3],
+            "stride": [1, 1],
+            "padding": [1, 1],
+            "dilation": [1, 1],
+            "groups": 1,
+            "bias": true,
+            "paddingMode": "zeros"
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [7],
+        "child": [9],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Conv",
+        "parent": [8],
+        "child": [10],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "outputChannels": 384,
+            "kernelSize": [3, 3],
+            "stride": [1, 1],
+            "padding": [1, 1],
+            "dilation": [1, 1],
+            "groups": 1,
+            "bias": true,
+            "paddingMode": "zeros"
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [9],
+        "child": [11],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Conv",
+        "parent": [10],
+        "child": [12],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "outputChannels": 256,
+            "kernelSize": [3, 3],
+            "stride": [1, 1],
+            "padding": [1, 1],
+            "dilation": [1, 1],
+            "groups": 1,
+            "bias": true,
+            "paddingMode": "zeros"
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [11],
+        "child": [13],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Pooling",
+        "parent": [12],
+        "child": [14],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "max",
+            "outputSizeAdapt": [0, 0],
+            "kernelSize": [3, 3],
+            "stride": [2, 2],
+            "padding": [0, 0],
+            "dilation": [1, 1] 
+        }
+    },
+    {
+        "blockName": "Flatten",
+        "parent": [13],
+        "child": [15],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "startDim": 1,
+            "endDim": -1
+        }
+    },
+    {
+        "blockName": "Linear",
+        "parent": [14],
+        "child": [16],
+        "args": {
+            "inputSize": [],
+            "outputSize": [32, 4096],
+            "bias": 1
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [15],
+        "child": [17],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Dropout",
+        "parent": [16],
+        "child": [18],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "p": 0.5,
+            "inplace": false  
+        }
+    },
+    {
+        "blockName": "Linear",
+        "parent": [17],
+        "child": [19],
+        "args": {
+            "inputSize": [],
+            "outputSize": [32, 4096],
+            "bias": 1
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [18],
+        "child": [20],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Dropout",
+        "parent": [19],
+        "child": [21],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "p": 0.5,
+            "inplace": false  
+        }
+    },
+    {
+        "blockName": "Linear",
+        "parent": [20],
+        "child": [],
+        "args": {
+            "inputSize": [],
+            "outputSize": [32, 1000],
+            "bias": 1
+        }
+    }
+]

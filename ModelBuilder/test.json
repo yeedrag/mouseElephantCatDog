@@ -4,8 +4,8 @@
         "parent": [],
         "child": [1, 2],
         "args": {
-            "inputSize": [],
-            "outputSize": [32, 2]
+            "inputSize": [32, 2],
+            "outputSize": []
         }
     },
     {

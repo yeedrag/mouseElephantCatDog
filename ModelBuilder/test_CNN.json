@@ -1,0 +1,75 @@
+[
+    {
+        "blockName": "Input",
+        "parent": [],
+        "child": [1],
+        "args": {
+            "inputSize": [32, 10, 32, 32],
+            "outputSize": []
+        }
+    },
+    {
+        "blockName": "Conv",
+        "parent": [0],
+        "child": [2],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "outputChannels": 100,
+            "kernelSize": [3, 3],
+            "stride": [1, 1],
+            "padding": "same",
+            "dilation": [1, 1],
+            "groups": 1,
+            "bias": true,
+            "paddingMode": "zeros"
+        }
+    },
+    {
+        "blockName": "Activation",
+        "parent": [1],
+        "child": [3],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "ReLU"
+        }
+    },
+    {
+        "blockName": "Pooling",
+        "parent": [2],
+        "child": [4],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "mode": "max",
+            "outputSizeAdapt": [0, 0],
+            "kernelSize": [3, 3],
+            "stride": [1, 1],
+            "padding": [0, 0],
+            "dilation": [1, 1] 
+
+        }
+    },
+    {
+        "blockName": "Flatten",
+        "parent": [3],
+        "child": [5],
+        "args": {
+            "inputSize": [],
+            "outputSize": [],
+            "startDim": 1,
+            "endDim": -1
+        }
+    },
+    {
+        "blockName": "Linear",
+        "parent": [4],
+        "child": [],
+        "args": {
+            "inputSize": [],
+            "outputSize": [32, 5],
+            "bias": 1
+        }
+    }
+]

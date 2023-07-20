@@ -122,13 +122,37 @@ function createBlock({
 	return block;
 }
 
+
 qry("#addBlock").addEventListener("click", e => {
-	qry("#workspace").appendChild(
-		createBlock({
-			header: prompt("Please write some HTML for the header"),
-			content: prompt("Please write some HTML for the content")
-		})
-	);
+	let header = document.getElementById("blockType").value,
+		content = "";
+	switch (header) {
+		case "Input":
+			content = "outputSize:";
+			break;
+		case "Linear":
+			content = "outputSize:, bias:";
+			break;
+		case "ReLU":
+			content = "mode:";
+			break;
+		case "leakyReLU":
+			content = "mode:";
+			break;
+		case "Sigmoid":
+			content = "mode:";
+			break;
+		case "Tanh":
+			content = "mode:";
+			break;
+		case "Concat":
+			content = "outputSize:, dim:";
+			break;
+		default:
+			content = " ";
+			break;
+	}
+	qry("#workspace").appendChild(createBlock({ header, content }));
 });
 
 // create a Input block
@@ -136,13 +160,14 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 
 // add lines while button#addLine is clicked
 {
-	const addLineBtn = qry("#addLine"), wsDiv = qry("#workspace");
+	const addLineBtn = qry("#addLine"),
+		wsDiv = qry("#workspace");
 
 	const prepareForAnotherProcess = () => {
 		// "process" here and below means the period while connecting two blocks
 
 		addLineBtn.innerHTML = `Connect Blocks`;
-		addLineBtn.addEventListener("click", addLine, {once: true});
+		addLineBtn.addEventListener("click", addLine, { once: true });
 	};
 
 	const addLine = async e => { // click event
@@ -154,24 +179,24 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 		addLineBtn.addEventListener("click", e => {
 			addLineProcess.abort();
 			prepareForAnotherProcess();
-		}, {once: true});
+		}, { once: true });
 
 		// userSelectedABlock() is defined later
-		let block1 = await userSelectedABlock({signal: addLineProcess.signal})
-			.catch(err => {	
-				if(err.name != "aborted")
+		let block1 = await userSelectedABlock({ signal: addLineProcess.signal })
+			.catch(err => {
+				if (err.name != "aborted")
 					console.log("Error: ", err);
 			});
-		let block2 = await userSelectedABlock({signal: addLineProcess.signal})
+		let block2 = await userSelectedABlock({ signal: addLineProcess.signal })
 			.catch(err => {
-				if(err.name != "aborted")
+				if (err.name != "aborted")
 					console.log("Error: ", err);
 			});
 
-		if(addLineProcess.signal.aborted) return prepareForAnotherProcess();
-		if(block1 == block2){
+		if (addLineProcess.signal.aborted) return prepareForAnotherProcess();
+		if (block1 == block2) {
 			alert("You can't connect a block to itself!"),
-			prepareForAnotherProcess();
+				prepareForAnotherProcess();
 			return;
 		}
 
@@ -179,15 +204,15 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 		const redrawTheLine = (() => {
 			const [port1, port2] = [document.createElement("div"), document.createElement("div")];
 			[port1, port2].forEach(p => p.classList.add("port"));
-				// ref: ./index.css, block .port
-				// each port is a circle with radius equal to 5px.
+			// ref: ./index.css, block .port
+			// each port is a circle with radius equal to 5px.
 			block1.querySelector(".outputPorts").appendChild(port1);
 			block2.querySelector(".inputPorts").appendChild(port2);
 
 			let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-				// don't use doc~.createElement("svg" or "svg:svg") cuz that only
-				// creates an HTML element with that tag name. The result will be 
-				// an instance of HTMLUnknownElement, not a SVGElement.
+			// don't use doc~.createElement("svg" or "svg:svg") cuz that only
+			// creates an HTML element with that tag name. The result will be 
+			// an instance of HTMLUnknownElement, not a SVGElement.
 
 			qry("#workspace").appendChild(svg);
 
@@ -207,7 +232,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 					const
 						x = (box.x + box.width / 2 - anchor.x) / workspaceConf.scale,
 						y = (box.y + box.height / 2 - anchor.y) / workspaceConf.scale;
-					return {x, y};
+					return { x, y };
 				});
 
 				const area = {
@@ -269,8 +294,8 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 		[block1, block2].forEach(block => {
 			block.addEventListener("redrawLines", redrawTheLine);
 			block.dispatchEvent(new CustomEvent("redrawLines"));
-				// after the ports added, other ports are sure to move,
-				// so the other lines need to be redrawn as this line does.
+			// after the ports added, other ports are sure to move,
+			// so the other lines need to be redrawn as this line does.
 		});
 
 		prepareForAnotherProcess();
@@ -278,16 +303,16 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 
 	prepareForAnotherProcess();
 
-	const userSelectedABlock = ({signal: signal}) => {
+	const userSelectedABlock = ({ signal: signal }) => {
 		return new Promise((resolve, reject) => {
-			if(signal.aborted) fail({name: "aborted"});
-			signal.addEventListener("abort", e => reject({name: "aborted"}), {once: true});
+			if (signal.aborted) fail({ name: "aborted" });
+			signal.addEventListener("abort", e => reject({ name: "aborted" }), { once: true });
 
 			const findTheBlock = e => { // click event
 				// finding block
 				let tmp = e.target;
-				while(!tmp.classList.contains("block")){
-					if(tmp == wsDiv){
+				while (!tmp.classList.contains("block")) {
+					if (tmp == wsDiv) {
 						listenToClick();
 						alert("Please click on a block");
 						return;
@@ -300,8 +325,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 
 			const listenToClick = () => wsDiv.addEventListener(
 				"click",
-				findTheBlock,
-				{signal: signal, once: true}
+				findTheBlock, { signal: signal, once: true }
 			);
 
 			listenToClick();

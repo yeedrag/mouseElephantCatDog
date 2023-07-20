@@ -58,9 +58,11 @@ def modelBuilder(path): # should be able to choose output method
 	with open(os.path.join(path)) as f:
 		preparer = modelBuilderPreparer(f)      
 		torchModel = model(*preparer.getAttr()).cuda()
-		dummyInput = torch.rand([32,2]).cuda()
+		#dummyInput = torch.rand([32, 2]).cuda()
+		dummyInputCNN = torch.rand([32, 3, 224, 224]).cuda()
 		print(torchModel)
-		summary(torchModel,dummyInput)
-		torch.onnx.export(torchModel,dummyInput,"model.onnx")
-path = os.path.join('./test.json')
+		summary(torchModel,dummyInputCNN)
+		torch.onnx.export(torchModel,dummyInputCNN,"alexNet.onnx")
+		# DONT COMMIT BIG FILES!!!
+path = os.path.join('./alexNet.json')
 modelBuilder(path)

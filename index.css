@@ -68,7 +68,7 @@ body > div {
 	position: absolute;
 	background-color: #f1f1f1;
 	text-align: center;
-	border: solid 1px #d3d3d3;
+	border: solid 2px #d3d3d3;
 
 	width: fit-content;
 	height: fit-content;
@@ -100,6 +100,11 @@ body > div {
 	display: inline-block;
 
 	background-color: #2196f3;
+}
+
+.block.selected {
+	border-color: limegreen;
+	box-shadow: 0 0 5px limegreen;
 }
 
 .lineContainer {

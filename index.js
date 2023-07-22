@@ -3,6 +3,70 @@ const qrys = (...query) => document.querySelectorAll(...query);
 
 const workspace = qry("#workspace");
 
+//block types
+let blockTypes = {
+	"Input": { // 這裡放 default value
+		"parent": [],
+		"child": [1, 2],
+		"args": {
+			"inputSize": [32, 2],				
+			"outputSize": []
+		}
+	},	
+	"Linear": { // 這裡放 default value
+		"parent": [14],
+		"child": [16],
+		"args": {
+			"inputSize": [],
+			"outputSize": [32, 4096],
+			"bias": 1
+			}
+	},
+	"ReLU": {  // 這裡放 default value
+		"parent": [15],
+		"child": [17],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+		}
+	},
+	"leakyReLU": {
+		"parent": [15],
+		"child": [17],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+		}
+	},
+	"Sigmoid": {
+		"parent": [15],
+		"child": [17],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+		}
+	},
+	"Tanh": {
+		"parent": [15],
+		"child": [17],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+		}
+	},
+	"Concat":{
+		"parent": [1, 2],
+		"child": [4],
+		"args": {
+			"inputSize": [],
+			"outputSize": [],
+			"dim": 1
+		}
+	}
+}
+
+
+
 // while the conf change, modify workspace accordingly
 const workspaceConf = new Proxy({ movementX: 0, movementY: 0, scale: 1 }, {
 	set: (target, key, value) => {
@@ -92,6 +156,7 @@ function createBlock({
 	// todo: change this element to import and export to json files
 	let block = document.createElement("div");
 	block.classList.add("block");
+	//<div class="content"><pre id = "json">${content || ""}</pre></div> to format json
 	block.innerHTML = `
 		<div class="inputPorts"></div>
 		<div class="header">${header || ""}</div>
@@ -124,35 +189,9 @@ function createBlock({
 
 
 qry("#addBlock").addEventListener("click", e => {
-	let header = document.getElementById("blockType").value,
-		content = "";
-	switch (header) {
-		case "Input":
-			content = "outputSize:";
-			break;
-		case "Linear":
-			content = "outputSize:, bias:";
-			break;
-		case "ReLU":
-			content = "mode:";
-			break;
-		case "leakyReLU":
-			content = "mode:";
-			break;
-		case "Sigmoid":
-			content = "mode:";
-			break;
-		case "Tanh":
-			content = "mode:";
-			break;
-		case "Concat":
-			content = "outputSize:, dim:";
-			break;
-		default:
-			content = " ";
-			break;
-	}
-	qry("#workspace").appendChild(createBlock({ header, content }));
+	let typeName = document.getElementById("blockType").value, content = "";
+	content = JSON.stringify(blockTypes[typeName], null);
+	qry("#workspace").appendChild(createBlock({ header: typeName, content }));
 });
 
 // create a Input block
@@ -160,8 +199,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 
 // add lines while button#addLine is clicked
 {
-	const addLineBtn = qry("#addLine"),
-		wsDiv = qry("#workspace");
+	const addLineBtn = qry("#addLine"), wsDiv = qry("#workspace");
 
 	const prepareForAnotherProcess = () => {
 		// "process" here and below means the period while connecting two blocks
@@ -187,11 +225,14 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 				if (err.name != "aborted")
 					console.log("Error: ", err);
 			});
+		block1.classList.add("selected");
+
 		let block2 = await userSelectedABlock({ signal: addLineProcess.signal })
 			.catch(err => {
 				if (err.name != "aborted")
 					console.log("Error: ", err);
 			});
+		block1.classList.remove("selected");
 
 		if (addLineProcess.signal.aborted) return prepareForAnotherProcess();
 		if (block1 == block2) {
@@ -252,7 +293,7 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 					oDown: area.down + area.padding,
 					oLeft: area.left - area.padding,
 					oRight: area.right + area.padding
-						// things will be o right~
+					// things will be o right~
 				});
 
 				Object.assign(area, {
@@ -325,7 +366,8 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 
 			const listenToClick = () => wsDiv.addEventListener(
 				"click",
-				findTheBlock, { signal: signal, once: true }
+				findTheBlock,
+				{ signal: signal, once: true }
 			);
 
 			listenToClick();

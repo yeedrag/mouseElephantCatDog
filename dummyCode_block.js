@@ -1,4 +1,5 @@
-const clone = obj => JSON.parse(JSON.stringify(obj));
+// const clone = obj => JSON.parse(JSON.stringify(obj));
+const clone = obj => structuredClone(obj);
 
 class Block extends EventTarget {
 	// https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/EventTarget

@@ -241,21 +241,23 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 			return;
 		}
 
-		// now draw a line for the two blocks
-		const redrawTheLine = (() => {
-			const [port1, port2] = [document.createElement("div"), document.createElement("div")];
-			[port1, port2].forEach(p => p.classList.add("port"));
-			// ref: ./index.css, block .port
-			// each port is a circle with radius equal to 5px.
-			block1.querySelector(".outputPorts").appendChild(port1);
-			block2.querySelector(".inputPorts").appendChild(port2);
+		// add ports to the blocks
+		const [port1, port2] = [document.createElement("div"), document.createElement("div")];
+		[port1, port2].forEach(p => p.classList.add("port"));
+		block1.querySelector(".outputPorts").appendChild(port1);
+		block2.querySelector(".inputPorts").appendChild(port2);
 
-			let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		let lineSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			// don't use doc~.createElement("svg" or "svg:svg") cuz that only
 			// creates an HTML element with that tag name. The result will be 
 			// an instance of HTMLUnknownElement, not a SVGElement.
 
-			qry("#workspace").appendChild(svg);
+		// now draw a line for the two blocks
+		const redrawTheLine = (() => {
+			// ref: ./index.css, block .port
+			// each port is a circle with radius equal to 5px.
+
+			qry("#workspace").appendChild(lineSvg);
 
 			const
 				abs = value => value > 0 ? value : -value,
@@ -263,7 +265,6 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 				max = (...values) => Math.max(...values);
 
 			return () => {
-				console.log("Drawing the line");
 				const [c1, c2] = [port1, port2].map(port => {
 					// c for the center of a port, 
 					// relative to the workspace center (anchor)
@@ -282,6 +283,8 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 					left: min(c1.x, c2.x),
 					right: max(c1.x, c2.x),
 					padding: 5
+						// the line we draw has its own thickness/width
+						// ref: ./index.css, .lineContainer
 				};
 
 				Object.assign(area, {
@@ -311,17 +314,9 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 						top: ${area.up - area.padding}px;
 						pointer-events: none;
 					`
-				}).forEach(([attr, value]) => svg.setAttribute(attr, value));
+				}).forEach(([attr, value]) => lineSvg.setAttribute(attr, value));
 
-				const setInnerXML = function(xml) {
-					// ref: https://stackoverflow.com/a/9724151/10596093
-					let tmpDoc = new DOMParser().parseFromString(xml, "application/xml");
-					this.appendChild(
-						this.outerDocument.adaptNode(tmpDoc.documentElement, true)
-					);
-				};
-
-				svg.innerHTML = `
+				lineSvg.innerHTML = `
 					<line 
 						x1="${area.oC1.x}"
 						y1="${area.oC1.y}"
@@ -332,12 +327,27 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 			}
 		})();
 
+		// redrawLines` event is dispatched when blocks moved
 		[block1, block2].forEach(block => {
 			block.addEventListener("redrawLines", redrawTheLine);
 			block.dispatchEvent(new CustomEvent("redrawLines"));
-			// after the ports added, other ports are sure to move,
-			// so the other lines need to be redrawn as this line does.
+				// after the ports added, other ports are sure to move,
+				// so the other lines need to be redrawn as this line does.
 		});
+
+		// if ports are clicked, cancel conections
+		[port1, port2].forEach(p => {
+			p.title = "Click to disconnect";
+			p.addEventListener("click", e => {
+				[port1, port2, lineSvg].forEach(p => p.remove());
+					// a removal of port affect the position of other ports
+				[block1, block2].forEach(b => {
+					b.dispatchEvent(new CustomEvent("redrawLines"));
+					b.removeEventListener("redrawLines", redrawTheLine);
+						// don't draw lines for non-existent ports
+				});
+			});
+		})
 
 		prepareForAnotherProcess();
 	};
@@ -350,6 +360,11 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 			signal.addEventListener("abort", e => reject({ name: "aborted" }), { once: true });
 
 			const findTheBlock = e => { // click event
+				e.preventDefault();
+				e.stopPropagation();
+					// prevent other things in the element from working
+					// e.g.: buttons, inputs or ports in the block
+
 				// finding block
 				let tmp = e.target;
 				while (!tmp.classList.contains("block")) {
@@ -367,7 +382,9 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 			const listenToClick = () => wsDiv.addEventListener(
 				"click",
 				findTheBlock,
-				{ signal: signal, once: true }
+				{ signal: signal, once: true, capture: true }
+					// `capture: true` is to prevent things in the element clicked from working
+					// e.g. ports, buttons or inputs in the block
 			);
 
 			listenToClick();

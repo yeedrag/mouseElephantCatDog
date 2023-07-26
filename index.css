@@ -28,28 +28,22 @@ body > nav {
 body > div {
 	flex: 1;
 
-	display: flex;
-	flex-flow: row nowrap;
+	display: grid;
+	grid-template: 1fr / 3em 9em 1fr;
 }
 
 #sidebar {
-	flex: 0 0;
-
-	display: flex;
-	border-right: solid 1px grey;
+	display: contents;
 }
 
 #categories {
-	flex: 0 0 3em;
-
 	overflow: auto;
 	border-right: solid 1px grey;
 }
 
 #choices {
-	flex: 0 0 9em;
-
 	overflow: auto;
+	border-right: solid 1px grey;
 }
 
 #workspaceContainer {

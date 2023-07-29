@@ -1,0 +1,52 @@
+- block.js
+	- class BlockTypeManager
+		- .constructor(typeList)
+		- .addType(type, typeSpec)
+			- type: string
+			- typeSpec: object
+				- readableName: string
+				- description: string
+				- output: object
+					- type: string.
+					- description: string
+				- input: object 
+					- type: string. The output datatype should be the same as the input datatype
+					- checker: function
+					- description: string
+				- args: [{ name, type, possibleValues, checker }]
+		- .getType()
+		- .listTypes()
+	- class Block extends EventTarget 
+		- .type
+		- .args
+		<!-- - .inputType（其實我不知道這個東西有沒有需要 type） -->
+		<!-- - .outputType（同上） -->
+		- .exportObj() // 目前構想是只把上面的部分匯出
+		// 然後是一些附在 BlockManager 上才能操作的屬性
+		- .pos
+		- .id
+		- .manager
+		- .inputBlocks() // returns an object of { id: block } pairs
+		- .outputBlocks() // returns an object pf { id: block } pairs
+		- .element
+		- .remove()
+		- event: `change`
+			- e.field = "pos" | "inputPorts" | "outputPorts" 之類的
+		- _assignManager({manager, id, element})
+		- _unassignManager()
+	- class _Line
+		- .constructor({inputBlockId, outputBlockId, inputPortElement, outputPortElement})
+		- .type
+		- .inputBlock
+		- .outputBlock
+		- .lineElement
+		- .redraw()
+		- .remove()
+	- class BlockManager extends EventTarget
+		- constructor(wsContainer, source)
+		- .addBlock(Block)
+		- .blocks
+		- .removeBlockById(id)
+		- .addLine()
+		- .removeLine()
+		- .export() // return json

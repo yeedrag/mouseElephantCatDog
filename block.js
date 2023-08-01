@@ -49,7 +49,7 @@ class Block extends EventTarget {
 			}
 		});
 
-		// set initial pos
+		// set initial .pos
 		this.pos = [0, 0];
 	}
 
@@ -61,25 +61,42 @@ class Block extends EventTarget {
 		};
 	}
 
-	/* -- START OF BlockManager -- */
-	// ._assignManager()
-	_assignMmanager({manager, id, element, pos}){
+	/* -- START OF for BlockManager -- */
+	// ._assignManager(), for BlockManager
+	_assignManager({manager, id, element}){
 		[this.#manager, this.#id, this.#element] = [manager, id, element];
-		this.pos = pos || [0, 0];
+		this.pos = [0, 0];
 
 		// now initialize the element
-		this.element.classList
+		// check .*El
+		this.#element.classList.add("block");
+		this.#element.innerHTML = `
+			<div class="inputPorts"></div>
+			<div class="header">${header || ""}</div>
+			<div class="content">${content || ""}</div>
+			<div class="outputPorts"></div>
+		`;
+
 		// ... to be continued
 	}
 
-	// ._unassignManager()
+	// ._unassignManager(), for BlockManager
 	_unassignManager(){ this.#manager = this.#id = this.element = undefined; }
-
-	// .remove()
-	remove(){ this.parent.removeBlockById(this.id) }
 
 	// .manager, read-only
 	get manager(){ return this.#manager }
+
+	// .element and .*El
+	// check this.#element.innerHTML in ._assignManager
+	get element(){ return this.#element }
+	get inputPortsEl(){ return this.#element?.querySelector(":scope > .inputPorts") }
+	get header(){ return this.#element?.querySelector(":scope > .header") }
+	get contentEl(){ return this.#element?.querySelector(":scope > .content") }
+	get outputPortsEl(){ return this.#element?.querySelector(":scope > .outputPorts") }
+
+	// .remove()
+	remove(){ this.#manager?.removeBlockById(this.id) }
+
 
 	// .id, read-only
 	get id(){ return this.#id }
@@ -87,7 +104,7 @@ class Block extends EventTarget {
 	// .pos
 	set pos(value){
 		this.dispatchEvent("posChange");
-		this.pos = new Proxy({ x: value.x || value[0], y: value.y || value[1]}, {
+		this.#pos = new Proxy({ x: value.x || value[0], y: value.y || value[1]}, {
 			set: (target, key, value) => {
 				target[key] = value;
 				this.dispatchEvent("posChange");
@@ -95,17 +112,130 @@ class Block extends EventTarget {
 			}
 		});
 	}
+	get pos(){ return this.#pos }
+	
+	/* -- START OF for Line -- */
+	#inputLines = [];
 
-	// ._linesToInput
-	// .inputBlocks
-	// ._linesFromOutput
-	// .outputBlocks
-	// ._exportObj()
-	/* -- END OF For Block Manager -- */
+	// ._assignInputLine(), for Line
+	_assignInputLine(line, index=this.#inputLines.length) {
+		this.inputPortsEl.insertBefore(
+			line.outputPort,
+			this.inputPortsEl.children[index] || null
+				// insertBefore(): when reference node is null, insert at the end
+		);
+		this.#inputLines.splice(index, 0, line);
+	}
+
+	// ._unassignInputLine(), for Line
+	_unassignInputLine(line){
+		let index = this.#inputLines.indexOf(line);
+		this.#inputLines.splice(index, 1);
+		line.outputPort.remove();
+	}
+
+	// ._assignOnputLine(), for Line
+	_assignOnputLine(line, index=this.#outputLines.length) {
+		this.outputPortsEl.insertBefore(
+			line.inputPort,
+			this.outputPortsEl.children[index] || null
+				// insertBefore(): when reference node is null, insert at the end
+		);
+		this.#outputLines.splice(index, 0, line);
+	}
+
+	// ._unassignOnputLine(), for Line
+	_unassignOnputLine(line){
+		let index = this.#outputLines.indexOf(line);
+		this.#outputLines.splice(index, 1);
+		line.inputPort.remove();
+	}
+
+	// ._exportObjForManager(), for BlockManager
+	/* -- END OF for Line -- */
+	/* -- END OF for Block Manager -- */
 }
 
-class _Line {
-	constructor(){
+class Line {
+	constructor(blockManager){
+		this.#manager = blockManager;
+
+		// the inputPort to the line is the outputPort to the input block;
+		// vice versa.
+		["inputPort", "outputPort"].forEach(port => {
+			Object.defineProperty(this, port, { value: document.createElement("div") });
+			this[port].classList.add("port");
+			this[port].addEventListener("pointerdown", e => {
+				const ptrDownTime = new Date();
+				await new Promise(res => this[port].addEventListener("pointerup", res, {once: true}));
+				const ptrUpTime = new Date();
+
+				if(ptrUpTime - ptrDownTime > 200)
+					return; // not a 'click'
+				this.remove();
+			})
+		});
+
+		this.#element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			// don't use doc~.createElement("svg" or "svg:svg") cuz that only
+			// creates an HTML element with that tag name. The result will be 
+			// an instance of HTMLUnknownElement, not a SVGElement.
+		
+	}
+
+	// .manager
+	get manager(){ return this.#manager }
+
+	// .remove()
+	remove() {
+		this._setInputBlock();
+		this._setOutputBlock();
+	}
+
+	// ._setInputBlock(), for BlockManger
+	_setInputBlock(blockId, index) {
+		// remove the old block
+		if(this.#inputBlockId)
+			this.inputBlock._unassignOutputLine(this);
+
+		// set the id and configure the line
+		this.#inputBlockId = blockId;
+		if(blockId)
+			this.inputBlock._assignOutputLine(this, index);
+	}
+
+	// .inputBlock
+	get inputBlock() { return this.#manager.getBlocks()[this.#inputBlockId] }
+
+	// .inputBlockId
+	get inputBlockId() { return this.#inputBlockId }
+
+	// ._setOutputBlock, for BlockManager
+	_setOutputBlock(blockId, index) {
+		// remove the old block
+		if(this.#outputBlockId)
+			this.outputBlock._unassignInputLine(this);
+
+		// set the id and configure the line
+		this.#outputBlockId = blockId;
+		if(blockId)
+			this.outputBlock._assignInputLine(this, index);
+	}
+
+	// .outputBlock
+	get outputBlock() { return this.#manager.getBlocks()[this.#outputBlockId] }
+
+	// .outputBlockId
+	get outputBlockId() { return this.#outputBlockId }
+
+	// .element
+	get element(){ return this.#element }
+
+	// .redraw()
+	redraw() {
+		if(!this.inputPort.checkVisibility() || !this.outputPort.checkVisibility())
+			return;
+		// should be implemented from the old code...
 	}
 }
 
@@ -118,7 +248,8 @@ class BlockManager extends EventTarget {
 
 		// .#ws
 		let wsCandidate = [...this.#wsC.querySelectorAll(":scope > div")]
-			.filter(ele => ele.children.length == 0)[0];
+			.filter(ele => ele.children.length == 0)
+			.sort((e1, e2) => e1.classList.has("workspace") ? -1 : 1)[0];
 		if(wsCandidate){
 			this.#ws = wsCandidate;
 		}else{
@@ -126,8 +257,8 @@ class BlockManager extends EventTarget {
 			this.#wsC.appendChild(this.#ws);
 		}
 
-		/* to import from source */
-		
+		/* to import from source */	
+		// ... to be continued
 	} // constructor()
 
 	// .ws
@@ -135,6 +266,40 @@ class BlockManager extends EventTarget {
 
 	// .wsC
 	get wsC() { return this.#wsC }
+
+	// .wsCfg
+	#wsCfg = new Proxy(
+		{ movementX: 0, movementY: 0, scale: 1 },
+		{ set: (target, key, value) => {
+			target[key] = value;
+
+			if (key == "scale") {
+				// apply scale
+				this.ws.style["scale"] = `${target.scale}`;
+			}
+
+			if (["showingX", "showingY"].includes(key)) {
+				// calc the actually movement
+				target.movementX = -target.showingX * target.scale;
+				target.movementY = -target.showingY * target.scale;
+			}
+
+			if (["movementX", "movementY", "scale"].includes(key)) {
+				// recalc the showing point
+				target.showingX = -target.movementX / target.scale;
+				target.showingY = -target.movementY / target.scale;
+			}
+
+			if (["movementX", "movementY", "showingX", "showingY"]) { // i.e., if movement changed
+				this.ws.style["translate"] = `${target.movementX}px ${target.movementY}px`;
+				// note: the "translate"d amounts seem not to be affected by "scale"
+			}
+
+			return true; // set handler should return true if success.
+		} })
+
+	// .wsCfg
+	get wsCfg(){ return this.#wsCfg }
 
 	#blocks = [];
 
@@ -152,7 +317,7 @@ class BlockManager extends EventTarget {
 		// ... the main parts are configured in Block
 
 		// configure the Block
-		block.assignManager({manager: this, id, element: elem});
+		block._assignManager({manager: this, id, element: elem});
 	}
 
 	// .blocks
@@ -168,10 +333,10 @@ class BlockManager extends EventTarget {
 		delete this.#blocks[id];
 	}
 
-	// .addLine
 	// .#lines
-	// .listLine
-	// .removeLine
+	// .addLine()
+	// .listLine()
+	// .removeLine()
 }
 
 export {BlockManager}

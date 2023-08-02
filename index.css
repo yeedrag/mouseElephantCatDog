@@ -102,6 +102,8 @@ body > div {
 }
 
 .lineContainer {
+	position: absolute;
+	pointer-events: none;
 	stroke: hsl(207 90% 80%);
 	stroke-width: 3px;
 	stroke-linecap: round;

@@ -1,6 +1,6 @@
 - block.js
 	- class TypeManager
-		- .constructor(typeList)
+- .constructor(typeList)
 		- .addType(type, typeSpec)
 			- type: string
 			- typeSpec: object
@@ -38,6 +38,7 @@
 			- 呼叫 .manager，把自己刪掉
 			- 呼叫所有有關聯的 Line，把他們刪掉
 			- 把 .manager, .pos, .in/outputlines 刪掉
+			- ……但是，這個 block 依然可以再次被加入 manager，所以可被重新使用
 
 		// 接著是一些跟 Line 有關的特性
 		- ._assignInputLine(line, index)
@@ -55,9 +56,11 @@
 
 		// 這個用來快速匯出，給 BlockManager 用的
 		- ._exportObjForManager()
+
 	- class Line
 		- .constructor(blockManager)
-			- 指定 block 的那些 id 的根據
+			- 指定 manager（block 的那些 id 的根據）
+			- 把 .element 塞入 blockManager.ws
 			- 生成 .inputPort 跟 .outputPort，供 BlockManager 或 Block 操作
 			- 生成 .element
 		- .manager // readonly
@@ -83,7 +86,9 @@
 		- .redraw()
 		- .remove()
 			- 解除 .in/outputBlock
+			- 把 .element 刪掉
 			- 在 .manager 中刪掉自己
+			- ……這條 Line 不可被重新使用，因為 manager 不能重新設定
 	- class BlockManager extends EventTarget
 		- constructor(wsContainer, source)
 		- .ws // workspaceElement
@@ -92,6 +97,6 @@
 		- .addBlock(block)
 		- .blocks // readonly
 		- .removeBlockById(id)
-		- .addLine()
-		- .removeLine()
+		- .genLine() // return a Line
+		- ._removeLine() // for Line
 		- .export() // return json

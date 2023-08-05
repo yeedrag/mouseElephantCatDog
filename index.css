@@ -61,7 +61,6 @@ body > div {
 .block {
 	position: absolute;
 	background-color: #f1f1f1;
-	text-align: center;
 	border: solid 2px #d3d3d3;
 
 	width: fit-content;

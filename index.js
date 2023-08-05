@@ -187,10 +187,12 @@ function createBlock({
 	return block;
 }
 
-
+// create block 
 qry("#addBlock").addEventListener("click", e => {
+	//get according blockType using html <select> scroller
 	let typeName = document.getElementById("blockType").value, content = "";
-	content = JSON.stringify(blockTypes[typeName], null);
+	content = '<pre>'+ JSON.stringify(blockTypes[typeName],undefined, 2) + '</pre>';
+	
 	qry("#workspace").appendChild(createBlock({ header: typeName, content }));
 });
 

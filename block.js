@@ -70,20 +70,34 @@ class Block extends EventTarget {
 	#element = (()=>{
 		const ele = document.createElement("div");
 		ele.classList.add("block");
+		ele.tabIndex = 0; // focusable
+
+		ele.addEventListener("keydown", e => {
+			if(e.target != e.currentTarget) return;
+			if(e.key == "Delete")
+				this.remove();
+		})
+
 		ele.innerHTML = `
-			<div class="inputPorts"></div>
+			<div class="inputPorts">
+				<div class="port addPort"></div>
+			</div>
 			<div class="header">${"NOT IMPLEMENTED HERE"}</div>
 			<div class="content">${"NOT IMPLEMENTED HERE"}</div>
-			<div class="outputPorts"></div>
+			<div class="outputPorts">
+				<div class="port addPort"></div>
+			</div>
 		`;
-
+		
 		const [inputPortsEl, headerEl, contentEl, outputPortsEl] = ele.children;
+		const [inputPortAddEl] = inputPortsEl.children;
+		const [outputPortAddEl] = outputPortsEl.children;
 
 		// move by dragging
 		headerEl.addEventListener("mousedown", e => {
 			const move = e => {
-				this.pos.x += e.movementX;
-				this.pos.y += e.movementY;
+				this.pos.x += e.movementX / (this.manager.wsCfg.scale || 1);
+				this.pos.y += e.movementY / (this.manager.wsCfg.scale || 1);
 			}
 			document.body.addEventListener("mousemove", move);
 			document.body.addEventListener("mouseup", e => {
@@ -94,10 +108,13 @@ class Block extends EventTarget {
 		return ele;
 	})();
 	get element(){ return this.#element }
-	get inputPortsEl(){ return this.#element?.querySelector(":scope > .inputPorts") }
-	get header(){ return this.#element?.querySelector(":scope > .header") }
-	get contentEl(){ return this.#element?.querySelector(":scope > .content") }
-	get outputPortsEl(){ return this.#element?.querySelector(":scope > .outputPorts") }
+	get inputPortsEl(){ return this.element.querySelector(":scope > .inputPorts") }
+	get header(){ return this.element.querySelector(":scope > .header") }
+	get contentEl(){ return this.element.querySelector(":scope > .content") }
+	get outputPortsEl(){ return this.element.querySelector(":scope > .outputPorts") }
+
+	get inputPortAddEl(){ return this.inputPortEl.querySelector(":scope > .addPort") }
+	get outputPortAddEl(){ return this.outputPortEl.querySelector(":scope > .addPort") }
 
 	/* -- START OF for BlockManager -- */
 	// ._assignManager(), for BlockManager
@@ -162,7 +179,7 @@ class Block extends EventTarget {
 	_assignInputLine(line, index=this.#inputLines.length) {
 		this.inputPortsEl.insertBefore(
 			line.outputPort,
-			this.inputPortsEl.children[index] || null
+			this.inputPortsEl.children[index] || this.inputPortAddEl || null
 				// insertBefore(): when reference node is null, insert at the end
 		);
 		this.#inputLines.splice(index, 0, line);
@@ -180,7 +197,7 @@ class Block extends EventTarget {
 	_assignOnputLine(line, index=this.#outputLines.length) {
 		this.outputPortsEl.insertBefore(
 			line.inputPort,
-			this.outputPortsEl.children[index] || null
+			this.outputPortsEl.children[index] || this.outputPortAddEl || null
 				// insertBefore(): when reference node is null, insert at the end
 		);
 		this.#outputLines.splice(index, 0, line);
@@ -507,7 +524,7 @@ class BlockManager extends EventTarget {
 
 	// .removeBlockById()
 	removeBlockById(id){
-		if(['number', 'string'].includes(typeof id))
+		if(!['number', 'string'].includes(typeof id))
 			throw "please specify the id";
 
 		this.#blocks[id].element.remove();

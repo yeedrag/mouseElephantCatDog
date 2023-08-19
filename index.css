@@ -60,40 +60,50 @@ body > div {
 
 .block {
 	position: absolute;
-	background-color: #f1f1f1;
 	text-align: center;
-	border: solid 2px #d3d3d3;
+	border: solid 2px transparent;
+	border-radius: 0.5em;
+	overflow: clip;
 
 	width: fit-content;
 	height: fit-content;
+
+	--port-radius: 5px;
+}
+
+.block:focus {
+	border-color: limegreen;
 }
 
 .block > .header {
 	padding: 0.5em;
+	padding-top: calc(var(--port-radius) + 0.5em);
 	cursor: move;
 	background-color: #2196f3;
 }
 
 .block > .content {
+	padding: 0.5em;
+	padding-bottom: calc(var(--port-radius) + 0.5em);
 	background-color: #222;
 }
 
 .block > :is(.inputPorts, .outputPorts) {
 	white-space: nowrap;
+	height: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center
 }
 
 .block .port {
-	/*
-	 * if the shape or the radius changed,
-	 * modify the redrawTheLine() in ./index.js accordingly 
-	 */
-	--radius: 5px;
+	--radius: var(--port-radius); /* defined in .block */
 	width: calc(2 * var(--radius));
 	height: calc(2 * var(--radius));
 	border-radius: var(--radius);
 	display: inline-block;
 
-	background-color: #2196f3;
+	background-color: white;
 }
 
 .block.selected {

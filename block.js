@@ -1,5 +1,46 @@
+/**
+ * Notes for the codes:
+ * - [Proxy]( https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy )
+ *   is used to intercept all modifications to specific objects. Therefore we can dispatch 
+ *   events as the properties changed. 
+ *
+ * - [`Object.defineProperty()`]( https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty )
+ *   is used to precisely define a property of an object. They're default to read-only and
+ *   not enumerable.
+ *
+ * - [Getter]( https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get )
+ *   and [Setter]( https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions#getter_and_setter_functions )
+ *   can be used to restrict or intercept an access to a property, too. Sometimes, it's
+ *   much easier to used than Proxy and `Object.defineProperty()`.
+ *
+ *   In this code, we use getter-only properties to expose private members in classes as 
+ *   read-only properties.
+ *
+ * Notes for the comments:
+ * - Most (not all) of the comments starting with /** and ends with *\/ can be parsed as 
+ *   jsDoc.
+ *   - There seem to be some errors while jsDoc is parsing ES6 classes. Thus, we must
+ *     explicitly specify `@memberof NAME_OF_THE_CLASS` for the properties/methods
+ *     /members.
+ */
+
+/** 
+ * @typedef {number} integer
+ * @typedef {number} float
+ */
+
+/**
+ * A utility function to call console.log much easier.
+ * @param {...*} x - Just use this function as `console.log()`.
+ */
 const dbg = (...x) => console.log(...x);
 
+/**
+ * A utility function to deep copy things (especially for functions)
+ * @func clone
+ * @param {object} obj - The object to copy.
+ * @return {object} The copied object.
+ */
 const clone = obj => {
 	if(obj instanceof Array){
 		return obj.map(ele => clone(ele))
@@ -12,41 +53,161 @@ const clone = obj => {
 	}
 };
 
+/**
+ * (Dummy) The type checker in type definition
+ * @callback TypeChecker
+ * @param {Block} inputBlock  - The block whose data will be transmitted to the `outputBlock`
+ * @param {Block} outputBlock - The block who will get the data from input block.
+ */
+
+/**
+ * (Dummy) A type for a block.
+ *
+ * TODO: Discuss for whether to create a class for it so that it's no longer an dummy concept.
+ * TODO: How should the types of arguments be defined.
+ *
+ * @typedef {object} TypeSpec             
+ * @prop {string}   name                  - The type's name.
+ * @prop {string}   readableName          - A human readable name.
+ * @prop {string}   description           - The description for the block; human readable
+ *
+ * @prop {object}   input                 - Information for the input block to be linked.
+ * @prop {string}   input.type            - The type's name that the input block should meets.
+ * @prop {string}   input.description     - Other requirements; human readable.
+ * @prop {TypeChecker} input.checker      - A function to check whether the input block meets
+ *   requirements besides the type. It should be invoked when users trying to connect a Line.
+ *
+ * @prop {object}   output                - Information for the output block to be linked.
+ * @prop {string}   output.type           - The type's name that the output block should meets.
+ * @prop {string}   output.description    - Other requirements; human readable.
+ */
+
+/** 
+ * Class to contain types for blocks.
+ */
 class TypeManager {
 	#registeredTypes = {};
-	constructor(typeDefs) {
-		Object.entries(typeDefs).forEach(([name, spec]) => {
-			Object.defineProperty(this.#registeredTypes, name, { value: clone(spec) });
-		});
+
+	/** 
+	 * Create the manager.
+	 * @param {object} typeDefs - For each entires, the key is the type's name, 
+	 *   and the {TypeSpec} spec is the definition of it.
+	 */
+	constructor(specs) {
+		specs.forEach(spec => 
+			Object.defineProperty( // to define a type as constant (immutable)
+				this.#registeredTypes,
+				spec.name,
+				{ value: clone(spec), enumerable: true } // clone to prevent further changes from outside
+			)
+		)
 	}
-	addType(name, spec) {
-		Object.defineProperty(this.#registeredTypes, name, { value: clone(spec) });
+
+	/**
+	 * Register a type.
+	 * @param {TypeSpec} spec - The specification of the type being registered.
+	 * @throws {TypeError} When trying to register a type with the same name again.
+	 *   More Info: [About the Error]( https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cant_redefine_property )
+	 */
+	addType(spec) {
+		// TODO: validate the `spec`
+		Object.defineProperty(this.#registeredTypes, name, { value: clone(spec), enumerable: true });
 	}
+
+	/** 
+	 * Get a type's spec by its name.
+	 * @param {string} name - The name of the type who we are to get.
+	 * @return {TypeSpec}
+	 */
 	getType(name) {
 		return clone(this.#registeredTypes[name])
 	}
+
+	/** 
+	 * Get an object of registered types.
+	 * @return {Object} For each entries, the key is the type name {string}, 
+	 *   and the value is the type definition {TypeSpec}
+	 */
 	listTypes() {
 		return clone(this.#registeredTypes)
 	}
 }
 
+/** 
+ * An object that has adequate information for rebuilding a block.
+ * This object can be parsed from a string with `JSON.parse()`, so can it
+ * be stored as a string with `JSON.stringify()`.
+ *
+ * TODO: We may need to write functions for a more detailed convertion.
+ *
+ * @typedef {object} BlockExpr
+ * @prop {string} type - The name of the block's type.
+ *
+ * TODO: Finish the definition here...
+ *   - Input related
+ *   - Output related
+ */
+
+/** 
+ * Class that represents a block. It use the EventTarget feature, so 
+ * we can use `.addEventListener()` and `.dispatchEvent()`.
+ *
+ * The concept of a Block is a visualzed dummy operation. The operation reads
+ * the input, behaves according to the arguments, and generate output in the
+ * end. The input and output have specific formats and directions, and each 
+ * arguments has their own type and value. 
+ *
+ * We stores the directions and values here, and summarize the formats and 
+ * types with the Block's type. The detailed definition of the blocks are up 
+ * there in TypeManager and TypeSpec.
+ */
 class Block extends EventTarget {
-	constructor({typeManager, source}){
+	/**
+	 * Create the Block.
+	 *
+	 * @param {object}       options
+	 * @param {TypeManager}  options.typeManager   - The type manager where the 
+	 *   `options.source.type` is defined inside
+	 * @param {BlockExpr}    options.source        - Information for (re)building
+	 *   a block. Some (TODO: what exactly?) may be ignore here, such as 
+	 *   input/output related information.
+	 */
+	constructor({ typeManager, source }){
 		super();
 
-		source = {args: {}, ...source}
+		source = { args: {}, ...source }
 
 		// .type
-		Object.defineProperty(this, "type", {value: source.type, enumerable: true});
+		Object.defineProperty(this, "type", { value: source.type, enumerable: true });
 			// by default: writable: false and enumerable: false
 	
-		// ... other source import should be done here
+		// TODO: ... configure the block with other information from source
 	}
 
-	// .args
+	/**
+	 * A magic object that stores the values of the block's arguments.
+	 * For each entries, the key is attribute's name, and the value is its data.
+	 * Once an entry is changed, the `argChange` event is dispatched on the Block.
+	 *
+	 * TODO: Discuss whether to create a class for arguments of an object.
+	 *
+	 * @fires Block#argChange - When any of the arguments' value is reassigned.
+	 * @memberof Block.prototype
+	 * @member args
+	 * @const
+	 * @type {Object}
+	 */	
 	#args = new Proxy({}, {
 		set: (obj, key, value) => {
-			// should be re-considered
+			/**
+			 * An event that indicates that an argument's value is changed.
+			 *
+			 * @event Block#argChange
+			 * @type {object}
+			 * @property {object} detail
+			 * @property {string} detail.argName - The name of the argument who is 
+			 *   changed.
+			 */
 			this.dispatchEvent(
 				new CustomEvent("argChange", {
 					detail: { argName: key } 
@@ -58,20 +219,40 @@ class Block extends EventTarget {
 	});
 	get args(){ return this.#args; }
 
-	// .exportObj()
+
+	/**
+	 * This exports the block as an {BlockExpr} without the input/output
+	 * related parts.
+	 *
+	 * @memberof Block.prototype
+	 * @method exportObj
+	 * @return {BlockExpr}
+	 */
 	exportObj(){
 		return {
-			type: this.type,
-			args: this.args
+			type: clone(this.type),
+			args: clone(this.args)
+
+			// TODO: Are there something else that's suitable to be exported here?
+			// Should we export the .pos?
 		};
 	}
 
-	// .element and .*El
+	/**
+	 * The visualized elements of a block are created alongside the block 
+	 * itself.
+	 *
+	 * @memberof Block.prototype
+	 * @member element
+	 * @const
+	 * @type {HTMLDivElement}
+	 */
 	#element = (()=>{
 		const ele = document.createElement("div");
 		ele.classList.add("block");
 		ele.tabIndex = 0; // focusable
 
+		// remove the whole block when the user press on delete
 		ele.addEventListener("keydown", e => {
 			if(e.target != e.currentTarget) return;
 			if(e.key == "Delete")
@@ -108,8 +289,39 @@ class Block extends EventTarget {
 		return ele;
 	})();
 	get element(){ return this.#element }
+
+	/**
+	 * The components of the Block.prototype.element, including
+	 *   - `inputPortsEl`: the place to hold the (Line.prototype.outputPortEl)s
+	 *     from the Lines attached.
+	 *   - `headerEl`: the field for the Block's title, which usually is the 
+	 *     TypeSpec.readableName where the TypeSpec is looked up with the Block's 
+	 *     type in the TypeManager that's used to create the Block.
+	 *   - `contentEl`: the field to hold the elements of the Block's arguments.
+	 *   - `outputPortsEl`: the place to hold the (Line.prototype.inputPortEl)s
+	 *     from the Lines attached.
+	 *   - `inputPortAddEl`: a dummy port in `inputPortsEl` that user can click
+	 *     to start a line connection session
+	 *   - `outputPortAddEl`: a dummy port in `outputPortsEl` that user can click
+	 *     to start a line connection session
+	 *
+	 * TODO: To make the code more stable, maybe we should 
+	 *   - prevent the *El.remove() methods from being called
+	 *   - declear private member for each *El, and set them up in constructor().
+	 *     Then, we can make our getters simply refer to them, without calling 
+	 *     querySelector() whenever we need them.
+	 *
+	 * TODO: Create elements to visualize the arguments, and re-render them.
+	 *
+	 * TODO: Configure the two *AddPortEl, so they starts a session after clicked.
+	 *
+	 * @memberof Block.prototype
+	 * @member *El
+	 * @const
+	 * @type {HTMLDivElement}
+	 */
 	get inputPortsEl(){ return this.element.querySelector(":scope > .inputPorts") }
-	get header(){ return this.element.querySelector(":scope > .header") }
+	get headerEl(){ return this.element.querySelector(":scope > .header") }
 	get contentEl(){ return this.element.querySelector(":scope > .content") }
 	get outputPortsEl(){ return this.element.querySelector(":scope > .outputPorts") }
 
@@ -117,31 +329,80 @@ class Block extends EventTarget {
 	get outputPortAddEl(){ return this.outputPortEl.querySelector(":scope > .addPort") }
 
 	/* -- START OF for BlockManager -- */
-	// ._assignManager(), for BlockManager
+	/**
+	 * This method is for {BlockManager} and shouldn't be called directly.
+	 * See BlockManager.prototype.addBlock().
+	 *
+	 * @param {object}       options
+	 * @param {BlockManager} options.manager  - The manager to be assigned to this Block.
+	 * @param {integer}      options          - The id that this Block has in the manager.
+	 * @memberof Block.prototype
+	 * @method _assignManager
+	 */
 	_assignManager({manager, id}){
+		// TODO: throw error when the block has a manager already
+
 		[this.#manager, this.#id] = [manager, id];
 
-		// ... to be continued
+		// TODO: ... to be continued
 	}
 
-	// ._unassignManager(), for BlockManager
+	/**
+	 * This method is for {BlockManager} and shouldn't be called directly.
+	 * See BlockManager.prototype.removeBlockById().
+	 *
+	 * @memberof Block.prototype
+	 * @method _assignManager
+	 */
 	_unassignManager(){
+		// TODO: discuss if we should throw error or just return if the block has
+		//   no manager already.
 		[...this.#inputLines, ...this.#outputLines].forEach(line => line.remove());
 		this.#manager = this.#id = undefined;
 	}
 
-	// .manager, read-only
+	/**
+	 * The manager of the Block.
+	 *
+	 * @type {undefined|BlockManager}
+	 * @memberof Block.prototype
+	 * @member manager
+	 * @const
+	 */
 	#manager = undefined;
 	get manager(){ return this.#manager }
 
-	// .remove()
+	/**
+	 * A shorthand to call removeBlockById() on the BlockManager of this Block
+	 *
+	 * @methodof Block.prototype
+	 * @method remove
+	 */
 	remove(){ this.#manager?.removeBlockById(this.id) }
 
-	// .id, read-only
+	/**
+	 * The id that this Block has in its BlockManager.
+	 *
+	 * @memberof BlockManager
+	 * @member id
+	 * @const
+	 * @type {integer}
+	 */
 	#id = null;
 	get id(){ return this.#id }
 
-	// .pos
+	/**
+	 * The position of the Block's element in the workspace.
+	 * It's a magic member that provides easy assignment and retrievement.
+	 *
+	 * Use `pos.x` or `pos[0]` to assign/fetch the horizontal position; `pos.y` 
+	 * and `pos[1]` are for vertical position. You can also do 
+	 * `pos = { x: 12, y: 24 }` to set it quickly. `pos = [12, 24]` has the 
+	 * same effect.
+	 *
+	 * @memberof Block.prototype
+	 * @member pos
+	 */
 	#pos = new Proxy({ x: 0, y: 0 }, {
 		set: (target, key, value) => {
 			if(!["0", "1", "x", "y"].includes(key)) 
@@ -153,6 +414,12 @@ class Block extends EventTarget {
 				target.y = value;
 
 			this.element.style["translate"] = `${target.x}px ${target.y}px`;
+
+			/**
+			 * This event fires when the position changed.
+			 * @event Block#posChange
+			 * @type {undefined}
+			 */
 			this.dispatchEvent(new CustomEvent("posChange"));
 			return true;
 		},
@@ -173,25 +440,54 @@ class Block extends EventTarget {
 	get pos(){ return this.#pos }
 	
 	/* -- START OF for Line -- */
+	// this array stores the lines whose outputPorts are treated as this Block's inputPorts.
 	#inputLines = [];
 
-	// ._assignInputLine(), for Line
+	/**
+	 * This method should only be called by a Line's _setOutputBlock().
+	 * This method is used to add a line at the input side of this Block.
+	 *
+	 * @memberof Block.prototype
+	 * @method _assignInputLine
+	 * @param {Line}    line   - The Line whose output port is to be inserted into this Block's
+	 *   inputPortsEl.
+	 * @param {integer} index  - The position that the port should be inserted.
+	 */
 	_assignInputLine(line, index=this.#inputLines.length) {
+		// TODO: Discuss if we should remove all the Els and 
 		this.inputPortsEl.insertBefore(
 			line.outputPort,
 			this.inputPortsEl.children[index] || this.inputPortAddEl || null
 				// insertBefore(): when reference node is null, insert at the end
 		);
 		this.#inputLines.splice(index, 0, line);
+
+		// TODO: Fires `inputPortsChange` event
 	}
 
-	// ._unassignInputLine(), for Line
+	/**
+	 * This method removes a Line and its port from the Block's input part.
+	 *
+	 * @param {Line} line - The line to be removed.
+	 */
 	_unassignInputLine(line){
+		// TODO: Discuss what to do if the line isn't in the Block's input part?
+		//   - Option 1: Just return.
+		//   - Option 2: Throw custom error.
+		//   - Option 3: Let the error be (like now).
+
 		let index = this.#inputLines.indexOf(line);
 		this.#inputLines.splice(index, 1);
+
+		// TODO: Discuss whether we should check if the port is in our inputPortsEl
+		//   and what to do if it's not.
 		line.outputPort.remove();
+
+		// TODO: Fires `inputPortsChange` event
 	}
 
+	// TODO: Document these as the input part of Block.
+	// TODO: Do the TODO s written in the input part here.
 	#outputLines = [];
 	// ._assignOnputLine(), for Line
 	_assignOnputLine(line, index=this.#outputLines.length) {
@@ -211,6 +507,9 @@ class Block extends EventTarget {
 	}
 
 	// ._exportObjForManager(), for BlockManager
+	// TODO: Write the function that exports a BlockExpr but with input, output,
+	//   and pos parts included. This function should be called by BlockManager 
+	//   when exporting things.
 	/* -- END OF for Line -- */
 	/* -- END OF for Block Manager -- */
 }

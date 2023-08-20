@@ -16,10 +16,9 @@ globalThis.expose = debugging ? (obj) => {
 } : () => {};
 globalThis.dbg = debugging ? (...x) => console.log(...x) : () => {};
 
-
-let typeManager = new blkMgr.TypeManager({
-	input: {}
-});
+let typeManager = new blkMgr.TypeManager([
+	{ name: "input" }
+]);
 
 let blockManager = new blkMgr.BlockManager({
 	workspaceContainer: document.querySelector("#workspaceContainer")

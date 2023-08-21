@@ -25,9 +25,9 @@
  */
 
 /** 
+ * A interger.
  * @typedef {number} integer
- * @typedef {number} float
- */
+*/
 
 /**
  * A utility function to call console.log much easier.
@@ -83,17 +83,17 @@ const clone = obj => {
  */
 
 /** 
- * Class to contain types for blocks.
+ * A class to contain types for blocks.
  */
 class TypeManager {
 	#registeredTypes = {};
 
 	/** 
 	 * Create the manager.
-	 * @param {object} typeDefs - For each entires, the key is the type's name, 
-	 *   and the {TypeSpec} spec is the definition of it.
+	 * @param {TypeSpec[]} [typeDefs] - A list of specifications of the types to be
+	 * registered.
 	 */
-	constructor(specs) {
+	constructor(specs = []) {
 		specs.forEach(spec => 
 			Object.defineProperty( // to define a type as constant (immutable)
 				this.#registeredTypes,
@@ -149,7 +149,7 @@ class TypeManager {
  */
 
 /** 
- * Class that represents a block. It use the EventTarget feature, so 
+ * A class that represents a block. It use the EventTarget feature, so 
  * we can use `.addEventListener()` and `.dispatchEvent()`.
  *
  * The concept of a Block is a visualzed dummy operation. The operation reads
@@ -168,13 +168,14 @@ class Block extends EventTarget {
 	 * @param {object}       options
 	 * @param {TypeManager}  options.typeManager   - The type manager where the 
 	 *   `options.source.type` is defined inside
-	 * @param {BlockExpr}    options.source        - Information for (re)building
+	 * @param {BlockExpr}    [options.source]      - Information for (re)building
 	 *   a block. Some (TODO: what exactly?) may be ignore here, such as 
 	 *   input/output related information.
 	 */
 	constructor({ typeManager, source }){
 		super();
 
+		// initialize, so things won't panic if `source` is not a complete {BlockExpr}.
 		source = { args: {}, ...source }
 
 		// .type
@@ -285,6 +286,8 @@ class Block extends EventTarget {
 				document.body.removeEventListener("mousemove", move);
 			}, { once: true })
 		});
+	
+		// TODO: Configure the two *AddPortEl, so they starts a session after clicked. 
 
 		return ele;
 	})();
@@ -292,18 +295,24 @@ class Block extends EventTarget {
 
 	/**
 	 * The components of the Block.prototype.element, including
-	 *   - `inputPortsEl`: the place to hold the (Line.prototype.outputPortEl)s
-	 *     from the Lines attached.
-	 *   - `headerEl`: the field for the Block's title, which usually is the 
-	 *     TypeSpec.readableName where the TypeSpec is looked up with the Block's 
-	 *     type in the TypeManager that's used to create the Block.
-	 *   - `contentEl`: the field to hold the elements of the Block's arguments.
-	 *   - `outputPortsEl`: the place to hold the (Line.prototype.inputPortEl)s
-	 *     from the Lines attached.
-	 *   - `inputPortAddEl`: a dummy port in `inputPortsEl` that user can click
-	 *     to start a line connection session
-	 *   - `outputPortAddEl`: a dummy port in `outputPortsEl` that user can click
-	 *     to start a line connection session
+	 *   - `inputPortsEl`
+	 *       The place to hold the (Line.prototype.outputPortEl)s
+	 *       from the Lines attached.
+	 *   - `headerEl`
+	 *       The field for the Block's title, which usually is the 
+	 *       TypeSpec.readableName where the TypeSpec is looked up with the Block's 
+	 *       type in the TypeManager that's used to create the Block.
+	 *   - `contentEl`
+	 *      The field to hold the elements of the Block's arguments.
+	 *   - `outputPortsEl`
+	 *       The place to hold the (Line.prototype.inputPortEl)s
+	 *       from the Lines attached.
+	 *   - `inputPortAddEl`
+	 *       A dummy port in `inputPortsEl` that user can click
+	 *       to start a line connection session. (TODO: See Block.prototype.#element)
+	 *   - `outputPortAddEl`
+	 *       A dummy port in `outputPortsEl` that user can click
+	 *       to start a line connection session. (TODO: same as the above)
 	 *
 	 * TODO: To make the code more stable, maybe we should 
 	 *   - prevent the *El.remove() methods from being called
@@ -312,8 +321,6 @@ class Block extends EventTarget {
 	 *     querySelector() whenever we need them.
 	 *
 	 * TODO: Create elements to visualize the arguments, and re-render them.
-	 *
-	 * TODO: Configure the two *AddPortEl, so they starts a session after clicked.
 	 *
 	 * @memberof Block.prototype
 	 * @member *El
@@ -333,11 +340,11 @@ class Block extends EventTarget {
 	 * This method is for {BlockManager} and shouldn't be called directly.
 	 * See BlockManager.prototype.addBlock().
 	 *
-	 * @param {object}       options
-	 * @param {BlockManager} options.manager  - The manager to be assigned to this Block.
-	 * @param {integer}      options          - The id that this Block has in the manager.
 	 * @memberof Block.prototype
 	 * @method _assignManager
+	 * @param {object}       options
+	 * @param {BlockManager} options.manager  - The manager to be assigned to this Block.
+	 * @param {integer}      options.id       - The id that this Block has in the manager.
 	 */
 	_assignManager({manager, id}){
 		// TODO: throw error when the block has a manager already
@@ -352,7 +359,7 @@ class Block extends EventTarget {
 	 * See BlockManager.prototype.removeBlockById().
 	 *
 	 * @memberof Block.prototype
-	 * @method _assignManager
+	 * @method _unassignManager
 	 */
 	_unassignManager(){
 		// TODO: discuss if we should throw error or just return if the block has
@@ -368,12 +375,15 @@ class Block extends EventTarget {
 	 * @memberof Block.prototype
 	 * @member manager
 	 * @const
+	 * @type {BlockManager}
 	 */
 	#manager = undefined;
 	get manager(){ return this.#manager }
 
 	/**
-	 * A shorthand to call removeBlockById() on the BlockManager of this Block
+	 * A shorthand to call removeBlockById() on the BlockManager of this Block.
+	 * This function removes the Block completely, but the Block should be 
+	 * reusable. 
 	 *
 	 * @methodof Block.prototype
 	 * @method remove
@@ -381,9 +391,11 @@ class Block extends EventTarget {
 	remove(){ this.#manager?.removeBlockById(this.id) }
 
 	/**
-	 * The id that this Block has in its BlockManager.
+	 * The id that this Block has in its BlockManager. It is actually the 
+	 * index of this Block in the BlockManager's blockList array.
+	 * See `BlockManager.prototype.addBlock()`.
 	 *
-	 * @memberof BlockManager
+	 * @memberof Block.prototype
 	 * @member id
 	 * @const
 	 * @type {integer}
@@ -402,6 +414,7 @@ class Block extends EventTarget {
 	 *
 	 * @memberof Block.prototype
 	 * @member pos
+	 * @type {object}
 	 */
 	#pos = new Proxy({ x: 0, y: 0 }, {
 		set: (target, key, value) => {
@@ -444,14 +457,16 @@ class Block extends EventTarget {
 	#inputLines = [];
 
 	/**
-	 * This method should only be called by a Line's _setOutputBlock().
+	 * This method is for Line and shouldn't be called directly. See 
+	 * `Line.prototype._setOutputBlock()`.
+	 *
 	 * This method is used to add a line at the input side of this Block.
 	 *
 	 * @memberof Block.prototype
 	 * @method _assignInputLine
-	 * @param {Line}    line   - The Line whose output port is to be inserted into this Block's
+	 * @param {Line}    line     - The Line whose output port is to be inserted into this Block's
 	 *   inputPortsEl.
-	 * @param {integer} index  - The position that the port should be inserted.
+	 * @param {integer} [index]  - The position that the port should be inserted.
 	 */
 	_assignInputLine(line, index=this.#inputLines.length) {
 		// TODO: Discuss if we should remove all the Els and 
@@ -468,7 +483,7 @@ class Block extends EventTarget {
 	/**
 	 * This method removes a Line and its port from the Block's input part.
 	 *
-	 * @param {Line} line - The line to be removed.
+	 * @param {Line} line - The Line to be removed.
 	 */
 	_unassignInputLine(line){
 		// TODO: Discuss what to do if the line isn't in the Block's input part?
@@ -513,8 +528,20 @@ class Block extends EventTarget {
 	/* -- END OF for Line -- */
 	/* -- END OF for Block Manager -- */
 }
-
+/**
+ * A class that represents a connection between two blocks.
+ */
 class Line {
+	/**
+	 * This constructor is for BlockManager and shouldn't be called directly.
+	 * See `BlockManager.prototype.genLine()`.
+	 *
+	 * This method creates a line.
+	 *
+	 * TODO: Consider to add other parameters so that it'll be easier to import/export.
+	 *
+	 * @param {BlockManager} blockManager - The block manager that creates this Line.
+	 */
 	constructor(blockManager){
 		if(!blockManager instanceof BlockManger)
 			throw "param blockManager should be an instance of BlockManager";
@@ -524,7 +551,7 @@ class Line {
 
 		// the inputPort to the line is the outputPort to the input block;
 		// vice versa.
-		["inputPort", "outputPort"].forEach(port => {
+		["inputPortEl", "outputPortEl"].forEach(port => {
 			Object.defineProperty(this, port, { value: document.createElement("div") });
 			this[port].classList.add("port");
 			this[port].addEventListener("pointerdown", async e => {
@@ -539,11 +566,24 @@ class Line {
 		});
 	}
 
-	// .manager
+	/**
+	 * The manager of the Line - i.e., the manager who creates this Line and displays this line in
+	 * their workspace.
+	 *
+	 * @memberof Line.prototype
+	 * @member manager
+	 * @const
+	 * @type {undefined|BlockManager}
+	 */
 	#manager = undefined;
 	get manager(){ return this.#manager }
 
-	// .remove()
+	/**
+	 * This function removes the Line completely. The line isn't reusable later.
+	 *
+	 * @memberof Line.prototype
+	 * @method remove
+	 */
 	remove() {
 		this._setInputBlock();
 		this._setOutputBlock();
@@ -551,33 +591,93 @@ class Line {
 		this.element.remove();
 	}
 
-	// .inputBlockId
+	/**
+	 * The id of the input block.
+	 *
+	 * @memberof Line.prototype
+	 * @member inputBlockId
+	 * @type {integer|undefined}
+	 * @const
+	 */
 	#inputBlockId = undefined;
 	get inputBlockId() { return this.#inputBlockId }
 
-	// .inputBlock
+	/**
+	 * The input block.
+	 *
+	 * @memberof Line.prototype
+	 * @member inputBlock
+	 * @type {Block|undefined}
+	 * @const
+	 */
 	get inputBlock() { return this.#manager.getBlocks()[this.#inputBlockId] }
 
-	// ._setInputBlock(), for BlockManger
+	/**
+	 * This method is for Block and Line.remove(), and shouldn't be called directly. 
+	 * It should be called by the one who started Line connection session.
+	 *
+	 * This method insert the Line's inputPort into a Block's outputLines array with
+	 * a give index. It automatically unset any probably existing old inputBlock.
+	 *
+	 * See: `Line.prototype.remove()`.
+	 * See: `Block.prototype.#element`. (TODO: This method is planned to be used in
+	 * the `*AddPortEl` parts for line connection sessions.)
+	 *
+	 * @memberof Line.prototype
+	 * @method _setInputBlock
+	 * @param blockId - The id of the input block. Leave it empty means to unset
+	 * the inputBlock only.
+	 * @param [index] - The index in `this.inputBlock.outputLines` array that this Line 
+	 * should be inserted into.
+	 * @return {bool} Whether it's successfully set. True if successful, and false
+	 * if failed. (TODO: not implemented.)
+	 */
 	_setInputBlock(blockId, index) {
 		// remove the old block
 		if(this.#inputBlockId)
 			this.inputBlock._unassignOutputLine(this);
 
+		// TODO: If this.outputBlock exists, run the type checker for the inputBlock
+		// to see if this will be a valid line. If valid, keep going anf returns 
+		// true later; if not, returns just return false.
+
 		// set the id and configure the line
 		this.#inputBlockId = blockId;
 		if(blockId)
 			this.inputBlock._assignOutputLine(this, index);
+
+		// TODO: Listen to events of this.inputBlock that indicates the possibility of 
+		// layout change of it, and then call this.redraw() on events. Of course, 
+		// remove the listener while removing the old block.	
 	}
 
-	// .outputBlockId
+	/** 
+	 * The id of the output Block.
+	 *
+	 * @memberof Line.prototype
+	 * @member outputBlockId
+	 * @const
+	 * @type {undefined|integer}
+	 */
 	#outputBlockId = undefined;
 	get outputBlockId() { return this.#outputBlockId }
 
-	// .outputBlock
+	/**
+	 * The output block.
+	 *
+	 * @memberof Line.prototype
+	 * @member outputBlock
+	 * @const
+	 * @type {Block|undefined}
+	 */
 	get outputBlock() { return this.#manager.getBlocks()[this.#outputBlockId] }
 
-	// ._setOutputBlock, for BlockManager
+	/**
+	 * See Line.prototype._setInputBlock().
+	 *
+	 * @memberof Line.prototype
+	 * @method setOutputBlock
+	 */
 	_setOutputBlock(blockId, index) {
 		// remove the old block
 		if(this.#outputBlockId)
@@ -587,9 +687,19 @@ class Line {
 		this.#outputBlockId = blockId;
 		if(blockId)
 			this.outputBlock._assignInputLine(this, index);
+
+		// TODO: See TODO: in Line.prototype._setInputBlock()
 	}
 
-	// .element
+	/**
+	 * The SVG Element visualizing the Line. It's automatically added to the 
+	 * workspace. See {BlockManager.prototype.genLine()}.
+	 *
+	 * @memberof Line.prototype
+	 * @member element
+	 * @const
+	 * @type {SVGSVGElement}
+	 */
 	#element = (()=>{
 		const ele = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			// don't use doc~.createElement("svg" or "svg:svg") cuz that only
@@ -598,13 +708,22 @@ class Line {
 		ele.classList.add("lineContainer");
 		return ele;
 	})();
-
 	get element(){ return this.#element }
 
-	// .redraw()
+	/**
+	 * This function redraws the Line in the workspace.
+	 *
+	 * @memberof Line.prototype
+	 * @method redraw
+	 */
 	redraw() {
 		this.element.innerHTML = "";
 		if(!this.inputPort.checkVisibility() || !this.outputPort.checkVisibility())
+			// TODO: rewrite this line cuz `checkVisibility` is only in a draft, not yet a living standard.
+			//   We may refer to:
+			//     - [The Draft]( https://drafts.csswg.org/cssom-view/#dom-element-checkvisibility )
+			//     - Element.prototype.getBoundingClientRect()
+			//     - Element.prototype.getClientRects()
 			return;
 
 		// some useful utilities
@@ -658,7 +777,7 @@ class Line {
 		});
 
 		// configure this.element
-		Object.entires({
+		Object.entries({
 			"class": "lineContainer",
 			"width": `${oWidth}`,
 			"height": `${oHeight}`,
@@ -679,7 +798,40 @@ class Line {
 	}
 }
 
+/** 
+ * An object that has adequate information for rebuilding a workspace.
+ * This object can be parsed from a string with `JSON.parse()`, so can it
+ * be stored as a string with `JSON.stringify()`.
+ *
+ * TODO: We may need to write functions for a more detailed convertion.
+ *
+ * @typedef {object} WsExpr
+ * @prop {blockExpr[]} blocks - A list of the blocks it contains.
+ *
+ * TODO: Finish the definition here...
+ */
+
+
+/**
+ * A class that holds a list of Blocks and Lines, and controls the elements that
+ * visualize them.
+ */
 class BlockManager extends EventTarget {
+	/**
+	 * Creates a BlockManager.
+	 *
+	 * @param options
+	 * @param {HTMLElement} options.workspaceContainer - An element to wrap the 
+	 *   workspace. This element may
+	 *   - be empty, so the function will insert a <div\> into it as the workspace.
+	 *   - have at least a <div\> or <main\>.
+	 *     - If some of these <div\> or <main\> has the "workspace" class, the 
+	 *       first of them (with "workspace") will be chosen as the workspace 
+	 *       element.
+	 *     - If none of these has the "workspace" class, then the first of the 
+	 *       <div\> or <main\>s will be chosen as the workspace elements.
+	 * @param {WsExpr} [options.source] - This is for quick import/export.
+	 */ 
 	constructor({ workspaceContainer, source = {} }) {
 		super();
 
@@ -699,8 +851,13 @@ class BlockManager extends EventTarget {
 			this.#wsC.appendChild(this.#ws);
 		}
 
-		/* to import from source */	
-		// ... to be continued
+		// .#wsCfg
+		Object.entries(this.#wsCfg).forEach(([key, value]) => {
+			this.#wsCfg[key] = value;
+		})
+
+		/* to import from `source` */	
+		// TODO: import from `source`
 
 		// now apply .wsCfg onto .ws and .wsC
 		Object.keys(this.wsCfg).forEach(key => this.wsCfg[key] = this.wsCfg[key]);
@@ -710,6 +867,7 @@ class BlockManager extends EventTarget {
 		this.#initWorkspace({ ws: this.ws, wsC: this.wsC, wsCfg: this.wsCfg });
 	} // constructor()
 
+	// this function is part of the constructor(). We moved it out for clarity.
 	#initWorkspace({ ws, wsC, wsCfg }) {
 		// move the workspace while mouse dragging
 		wsC.addEventListener("mousedown", e => {
@@ -758,17 +916,50 @@ class BlockManager extends EventTarget {
 		}
 	}
 
-	// .ws
-	#ws = undefined;
+	/**
+	 * The workspace, where Blocks and Lines are displayed inside.
+	 *
+	 * @memberof BlockManager.prototype
+	 * @member ws
+	 * @const
+	 * @type {HTMLElement}
+	 */
+	#ws = undefined; // init in constructor
 	get ws() { return this.#ws }
 
-	// .wsC
-	#wsC = undefined;
+	/**
+	 * The container of the workspace.
+	 *
+	 * @memberof BlockManager.prototype
+	 * @member wsC
+	 * @const
+	 * @type {HTMLElement}
+	 */
+	#wsC = undefined; // init in constructor
 	get wsC() { return this.#wsC }
 
-	// .wsCfg
+	/**
+	 * The configuration of the workspace. It's a special object that configure 
+	 * itself and `this.ws` automatically.
+	 *
+	 * @memberof BlockManager.prototype
+	 * @member wsCfg
+	 * @const
+	 * @type {Object}
+	 * @property {number} movementX - The horizontal position of the ws relative to 
+	 *   the wsC.
+	 * @property {number} movementY - The vertical position of the ws relative to 
+	 *   the wsC.
+	 * @property {number} scale     - How much is the ws zoomed.
+	 * @property {number} showingX  - The horizontal position of the top-left point
+	 *   in ws. i.e., if I want to put a Block's element in the ws, and align the 
+	 *   top-left point of the Block with the top-left point of the wsC, what should
+	 *   the Block's `pos.x` be?
+	 * @property {number} showingY  - Similar to the above, but it's the vertical
+	 *   position and the Block's `pos.y`.
+	 */
 	#wsCfg = new Proxy(
-		{ movementX: 0, movementY: 0, scale: 1 },
+		{ movementX: 0, movementY: 0, scale: 1},
 		{ set: (target, key, value) => {
 			target[key] = value;
 
@@ -797,19 +988,37 @@ class BlockManager extends EventTarget {
 			}
 
 			return true; // set handler should return true if success.
-		} })
-
-	// .wsCfg
+		} }); // new Proxy()
+		// init in constructor
 	get wsCfg(){ return this.#wsCfg }
 
+	/**
+	 * An array of the Blocks that this BlockManager contains. The `id` of a Block is 
+	 * actually the index of it in this array, so this may not be a continuous array
+	 * (i.e., some of the elements may be empty).
+	 *
+	 * @memberof BlockManager.prototype
+	 * @member Block
+	 * @const
+	 * @type {Block[]}
+	 */
 	#blocks = [];
+	get blocks() { return [...this.#blocks] }
 
-	// .addBlock()
+	/**
+	 * Add a Block to this BlockManager. This automatically assigns an id to the 
+	 * Block, which is actually the index of the Block in the `blocks` Array.
+	 *
+	 * @memberof BlockManager.prototype
+	 * @method addBlock
+	 * @param {Block} block - The Block to be added.
+	 */
 	addBlock(block) {
 		if(!block instanceof Block)
 			throw "addBlock(block) can only accept a Block as the block argument.";
 
-		// determine id by subtract 1 from the return value of Array.prototype.push(), which is the new length
+		// determine id by subtract 1 from the return value of 
+		// Array.prototype.push(), which is the new length
 		const id = this.#blocks.push(block) - 1;
 
 		// configure the Block
@@ -818,10 +1027,13 @@ class BlockManager extends EventTarget {
 		block.pos = [this.wsCfg.showingX, this.wsCfg.showingY];
 	}
 
-	// .blocks
-	get blocks() { return [...this.#blocks] }
-
-	// .removeBlockById()
+	/**
+	 * Remove a block from this BlockManager with a certain id.
+	 *
+	 * @memberof BlockManager.prototype
+	 * @method removeBlockById
+	 * @param {integer} id - The `id` of the Block to be removed..
+	 */
 	removeBlockById(id){
 		if(!['number', 'string'].includes(typeof id))
 			throw "please specify the id";
@@ -831,19 +1043,44 @@ class BlockManager extends EventTarget {
 		delete this.#blocks[id];
 	}
 
-	// .listLine()
+	/**
+	 * An array of lines that's created by `this.genLine()`.
+	 *
+	 * @memberof BlockManger.prototype 
+	 * @member lines
+	 * @const 
+	 * @type {Line[]}
+	 */
 	#lines = [];
 	listLine(){ return [...this.#lines] }
 
-	// .genLine()
+	/**
+	 * Create a Line() instance and add its element into `this.ws`.
+	 *
+	 * @memberof BlockManager.prototype
+	 * @method genLine
+	 * @return {Line}
+	 */
 	genLine(){
 		let newLine = new Line(this);
 			// Line() would add its element into this.ws
 		this.#lines.push(newLine);
+
+		// TODO: Add the newLine.element to the workspace.
+
 		return newLine;
 	}
 
-	// ._removeLine, for Line
+	/**
+	 * This method is for Line and shouldn't be called directly.
+	 * See: `Line.prototype.remove()`
+	 *
+	 * Remove a Line from this BlockManager.
+	 *
+	 * @memberof BlockManager.prototype
+	 * @method _removeLine
+	 * @param {Line} line - The line to be removed.
+	 */
 	_removeLine(line) {
 		this.#lines.splice(this.#lines.indexOf(line), 1);
 	}

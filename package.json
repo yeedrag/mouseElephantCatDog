@@ -1,5 +1,5 @@
 {
 	"scripts" : {
-		"doc": "npx jsdoc -c ./jsDocConf.json . && http-server ./jsDocOutput"
+		"doc": "npx jsdoc -c ./jsDocConf.json . && npx http-server ./jsDocOutput"
 	}
 }

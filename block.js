@@ -287,7 +287,7 @@ class Block extends EventTarget {
 			}, { once: true })
 		});
 	
-		// TODO: Configure the two *AddPortEl, so they starts a session after clicked. 
+		// TODO: Configure the two *AddPortEl, so they start a session after clicked. 
 
 		return ele;
 	})();
@@ -316,7 +316,7 @@ class Block extends EventTarget {
 	 *
 	 * TODO: To make the code more stable, maybe we should 
 	 *   - prevent the *El.remove() methods from being called
-	 *   - declear private member for each *El, and set them up in constructor().
+	 *   - declare private member for each *El, and set them up in constructor().
 	 *     Then, we can make our getters simply refer to them, without calling 
 	 *     querySelector() whenever we need them.
 	 *
@@ -347,7 +347,8 @@ class Block extends EventTarget {
 	 * @param {integer}      options.id       - The id that this Block has in the manager.
 	 */
 	_assignManager({manager, id}){
-		// TODO: throw error when the block has a manager already
+		if(this.#manager != undefined)
+			throw "Block already has a manager.";
 
 		[this.#manager, this.#id] = [manager, id];
 
@@ -362,8 +363,9 @@ class Block extends EventTarget {
 	 * @method _unassignManager
 	 */
 	_unassignManager(){
-		// TODO: discuss if we should throw error or just return if the block has
-		//   no manager already.
+		if(this.#manager == undefined)
+			throw "Block doesn't have a manager.";
+
 		[...this.#inputLines, ...this.#outputLines].forEach(line => line.remove());
 		this.#manager = this.#id = undefined;
 	}

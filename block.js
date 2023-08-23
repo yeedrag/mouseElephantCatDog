@@ -25,7 +25,7 @@
  */
 
 /** 
- * A interger.
+ * A integer.
  * @typedef {number} integer
 */
 
@@ -138,7 +138,7 @@ class TypeManager {
  * This object can be parsed from a string with `JSON.parse()`, so can it
  * be stored as a string with `JSON.stringify()`.
  *
- * TODO: We may need to write functions for a more detailed convertion.
+ * TODO: We may need to write functions for a more detailed conversion.
  *
  * @typedef {object} BlockExpr
  * @prop {string} type - The name of the block's type.
@@ -152,7 +152,7 @@ class TypeManager {
  * A class that represents a block. It use the EventTarget feature, so 
  * we can use `.addEventListener()` and `.dispatchEvent()`.
  *
- * The concept of a Block is a visualzed dummy operation. The operation reads
+ * The concept of a Block is a visualized dummy operation. The operation reads
  * the input, behaves according to the arguments, and generate output in the
  * end. The input and output have specific formats and directions, and each 
  * arguments has their own type and value. 
@@ -805,7 +805,7 @@ class Line {
  * This object can be parsed from a string with `JSON.parse()`, so can it
  * be stored as a string with `JSON.stringify()`.
  *
- * TODO: We may need to write functions for a more detailed convertion.
+ * TODO: We may need to write functions for a more detailed conversion.
  *
  * @typedef {object} WsExpr
  * @prop {blockExpr[]} blocks - A list of the blocks it contains.

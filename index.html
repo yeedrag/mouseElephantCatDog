@@ -1,63 +1,57 @@
 <!DOCTYPE html>
-<html><head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>chAIns</title>
-	<style> @import "./index.css"; </style>
-	<script src="./index.js" type="module" defer></script>
-</head><body>
-	<nav>
-		chAIns
-	</nav>
-	<div>
-		<div id="sidebar">
-			<div id="categories">
-				Not Implemented
-			</div>
-			<div id="choices">
-				<p>Choose block type</p>
-				<select id="blockType">
-					<optgroup label="Input">
-						<option value="Input">Input</option>
-					</optgroup>
-					<optgroup label="Linear">
-						<option value="Linear">Linear</option>
-					</optgroup>
-					<optgroup label="Activation">
-						<option value="ReLU">ReLU</option>
-						<option value="leakyReLU">LeakyReLU</option>
-						<option value="Sigmoid">Sigmoid</option>
-						<option value="Tanh">Tanh</option>
-					</optgroup>
-					<optgroup label="Concat">
-						<option value="Concat">Concat</option>
-					</optgroup>
-				</select>
-				
-				<button id="addBlock">Add Block</button>
+<html lang="en">
+  <head>
+    <!--  -->
+    <title>Cool</title>
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0" />-->
+    <meta charset="utf-8" />
+    <!--<meta property="twitter:card" content="summary_large_image"> -->
+    <style data-tag="default-style-sheet">
+      html {font-family: Inter;font-size: 16px;}
+      body {background-color: var(--dl-color-gray-white);}
+    </style>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./index.js"></script>
+  </head>
+  <body>
+    <!--topBar--------------------------------------------------------------------------------------------------------------------->
+    <div class="fixed-topBar" id="topBarContainer">
+      <ul class="fixed-topBar-list">
+        <li><button class="fixed-topBar-list-elements" id="settingButton"> setting </button></li>
+        <li><a  class="fixed-topBar-list-elements" href="trailPage.html" target="_blank">info</a></li>
+        <li><a  class="fixed-topBar-list-elements" href="trailPage.html" target="_blank">example</a></li>
+        <li><a  class="fixed-topBar-list-elements" href="trailPage.html" target="_blank">tutorial</a></li> 
+        <li id="compileButton"><button class="fixed-topBar-list-elements"> compile </button></li>
+        <li id="addButton"><label  for="addBlock-modal-flag">add</label></li>
 
-				<hr>
+        <input id="addBlock-modal-flag" type="checkbox" />
+        <div class="addBlock-modal-background">
+            <div class="addBlock-modal">
+              <h3 class="addBlock-modal-elements">Add a block</h3>
+                <select id="addBlock-modal-selectModel" class="addBlock-modal-elements">
+                  <option value="Input">Input</option>
+                  <option value="Linear" selected="selected">Linear</option>
+                  <option value="Relu">Relu</option>
+                </select>
+                <label  for="addBlock-modal-flag">Confirm</label>
+                <label  for="addBlock-modal-flag">Cancel</label>
+            </div>
+        </div>
 
-				<button id="addLine">Connect Blocks</button>
-				<hr>
-				<p>block config space</p>
-			</div>
-		</div>
-		<div id="workspaceContainer">
-			<main id="workspace">
-				<!-- An example block
-					<div class="block">
-						<div class="inputPorts">
-							< !-- Discuss Later -- >
-						</div>
-						<div class="header">Input</div>
-						<div class="content">< !-- Empty Here -- ></div>
-						<div class="outputPorts">
-							< !-- Discuss Later -- >
-						</div>
-					</div>
-				-->
-			</main>
-		</div>
-	</div>
-</body></html>
+      </ul>
+    </div>
+    <!--topBar--------------------------------------------------------------------------------------------------------------------->
+    <!--workspaceBlockPrototype---------------------------------------------------------------------------------------------------->
+    <div id="workSpace" ondragover="drag_over(event)" ondrop="drop(event)">
+      <div class="block" id="blockID:1" draggable="true" ondragstart="drag_start(event)" ondblclick="openNav()" tag="input">Input</div>
+      <div class="parameterBar" id="PBarID:1">
+        <a href="javascript:void(0)" class="parameterBar-elements" onclick="closeNav()">×</a>
+        <div class="parameterBar-elements">something here</div>
+        <button class="parameterBar-elements" onclick="test()"> test </button> 
+      </div>
+    </div>
+    
+    <!--workspaceBlockPrototype---------------------------------------------------------------------------------------------------->
+
+  </body>
+</html>

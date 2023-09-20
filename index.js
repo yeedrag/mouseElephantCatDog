@@ -97,8 +97,10 @@ function deleteBlock(event) {
     
     document.getElementById('blockID:' + idNum).remove();
     for(let i = idNum+1;i <= idMax; i++) {
-        let cur = document.getElementById('blockID:' + i);
-        cur.setAttribute('id', 'blockID:' + (i-1));
+        let curBlk = document.getElementById('blockID:' + i);
+        curBlk.setAttribute('id', 'blockID:' + (i-1));
+        let curClsB = document.getElementById('closeButton:' + i);
+        curClsB.setAttribute('id', 'closeButton:' + (i-1));
     }
     idMax--;
     console.log(idMax);

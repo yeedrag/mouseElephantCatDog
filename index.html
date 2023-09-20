@@ -11,9 +11,11 @@
       body {background-color: var(--dl-color-gray-white);}
     </style>
     <link rel="stylesheet" href="./style.css" />
-    <script src="./index.js"></script>
+    <script src="./index.js" type="module"></script>
   </head>
   <body>
+------------------------------------------------------------------------------------------------------------>
+
     <!--topBar--------------------------------------------------------------------------------------------------------------------->
     <div class="fixed-topBar" id="topBarContainer">
       <ul class="fixed-topBar-list">
@@ -22,36 +24,45 @@
         <li><a  class="fixed-topBar-list-elements" href="trailPage.html" target="_blank">example</a></li>
         <li><a  class="fixed-topBar-list-elements" href="trailPage.html" target="_blank">tutorial</a></li> 
         <li id="compileButton"><button class="fixed-topBar-list-elements"> compile </button></li>
+        <!--addBlock-->
         <li id="addButton"><label  for="addBlock-modal-flag">add</label></li>
-
         <input id="addBlock-modal-flag" type="checkbox" />
         <div class="addBlock-modal-background">
             <div class="addBlock-modal">
               <h3 class="addBlock-modal-elements">Add a block</h3>
-                <select id="addBlock-modal-selectModel" class="addBlock-modal-elements">
+                <select id="addBlock-modal-selecter" class="addBlock-modal-elements">
+                  <!--all the blocks here-->
                   <option value="Input">Input</option>
-                  <option value="Linear" selected="selected">Linear</option>
+                  <option value="Linear">Linear</option>
                   <option value="Relu">Relu</option>
+                  <!--all the blocks here-->
                 </select>
-                <label  for="addBlock-modal-flag">Confirm</label>
+                <label  for="addBlock-modal-flag" onclick="addBlock()">Confirm</label>
                 <label  for="addBlock-modal-flag">Cancel</label>
             </div>
         </div>
-
+        <!--addBlock-->
       </ul>
     </div>
     <!--topBar--------------------------------------------------------------------------------------------------------------------->
-    <!--workspaceBlockPrototype---------------------------------------------------------------------------------------------------->
+    <!--workspace---------------------------------------------------------------------------------------------------->
     <div id="workSpace" ondragover="drag_over(event)" ondrop="drop(event)">
-      <div class="block" id="blockID:1" draggable="true" ondragstart="drag_start(event)" ondblclick="openNav()" tag="input">Input</div>
+    
+    <!--block prototype
+      <div class="block" id="blockID:1" draggable="true" ondragstart="drag_start(event)" ondblclick="openParameterBar()" tag="input">
+        <a href="javascript:void(0)"  onclick="closeParameterBar()">×</a>
+        <h5>Input</h5>
+      </div>
       <div class="parameterBar" id="PBarID:1">
-        <a href="javascript:void(0)" class="parameterBar-elements" onclick="closeNav()">×</a>
+        <a href="javascript:void(0)" class="parameterBar-elements" onclick="closeParameterBar()">×</a>
         <div class="parameterBar-elements">something here</div>
         <button class="parameterBar-elements" onclick="test()"> test </button> 
       </div>
+    -->
+
     </div>
     
-    <!--workspaceBlockPrototype---------------------------------------------------------------------------------------------------->
+    <!--workspace---------------------------------------------------------------------------------------------------->
 
   </body>
 </html>

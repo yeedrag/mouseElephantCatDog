@@ -1,11 +1,9 @@
-import {hello} from './something.js'
 
-window.hello = hello;
-//I don't know how to avoid using all the function in global scope. all items with "window." prefix should be edited in some way.
+//I don't know how to avoid using all the function in global scope. all items with "window." prefix should be fixed in some way.
 
-//initailize ans util 
+//initailize ans util------------------------------------------------------------------------------------------------------------------
 var idMax = -1;
-function getIdNumber(string) {
+function getIdNumber(string) {//get id number from any form of id string whose id number is its suffix
     var idNum=0;
     for(let i = string.length-1, k = 1;string[i]!=':';i--) {
         idNum+=k*parseInt(string[i]);
@@ -13,11 +11,12 @@ function getIdNumber(string) {
     }
     return idNum;
 }
-function test() {
+function test() { //just to test whether a event is triggered correctly
     console.log("test");
 }
 window.test = test;
-//initailize 
+var blockDict = 
+//initailize-----------------------------------------------------------------------------------------------------------------------------
 
 //drag and drop--------------------------------------------------------------------------------------------------------------------------
 
@@ -48,24 +47,25 @@ window.drop = drop;
 
 //drag and drop--------------------------------------------------------------------------------------------------------------------------
 //dbclick for side collapse bar------------------------------------------------------------------------------------------------------------
-function openParameterBar() {
-    console.log("test");
-    document.getElementById("PBarID:1").style.width = "250px";
+function openParameterBarve(event) {
+    var idNum = getIdNumber(event.target.id);
+    document.getElementById("PBarID:" + idNum).style.width = "250px";
     //document.getElementById("main").style.marginLeft = "250px";
 }
 window.openParameterBar = openParameterBar;
 
-function closeParameterBar() {
-    document.getElementById("PBarID:1").style.width = "0";
+function closeParameterBar(event) {
+    var idNum = getIdNumber(event.target.id);
+    document.getElementById("PBarID:" + idNum).style.width = "0";
     //document.getElementById("main").style.marginLeft= "0";
 }
 window.closeParameterBar = closeParameterBar;
 //dbclick for side collapse bar------------------------------------------------------------------------------------------------------------
 
-//add new block----------------------------------------------------------------------------------------------------------------------------
+//add a new block and parameter bar----------------------------------------------------------------------------------------------------------------------------
 function addBlock() {
-    const ele = document.createElement("div");
     idMax++;
+    const ele = document.createElement("div"); 
     ele.setAttribute('id', 'blockID:' + idMax);
     ele.setAttribute('class', 'block');
     ele.setAttribute('draggable', true);
@@ -77,20 +77,32 @@ function addBlock() {
     const text = document.createElement("h2");
     text.textContent = type;
     ele.appendChild(text);
-    const closeButton = document.createElement("a");
-    closeButton.setAttribute('href', 'javascript:void(0)');
-    closeButton.setAttribute('id', 'closeButton:' + idMax);
-    closeButton.setAttribute('onclick','deleteBlock(event)');
-    closeButton.textContent = "X";
-    ele.appendChild(closeButton);
+    const addBlcokcloseButton = document.createElement("a");
+    addBlcokcloseButton.setAttribute('href', 'javascript:void(0)');
+    addBlcokcloseButton.setAttribute('id', 'addBlockCloseButton:' + idMax);
+    addBlcokcloseButton.setAttribute('onclick','deleteBlock(event)');
+    addBlcokcloseButton.textContent = "X";
+    ele.appendChild(addBlcokcloseButton);
 
     const workspace = document.getElementById('workSpace');
     workspace.appendChild(ele);
+
+    addParaBar(idMax);
 }
 window.addBlock = addBlock;
-//add new block----------------------------------------------------------------------------------------------------------------------------
 
-//delete block----------------------------------------------------------------------------------------------------------------------------
+function addParaBar(idMax) {
+    const ele = document.createElement("div");
+    const paraCloseButton = document.createElement("a");
+    paraCloseButton.setAttribute('href', 'javascript:void(0)');
+    paraCloseButton.setAttribute('id', 'PBarID:' + idMax);
+    paraCloseButton.setAttribute('class', 'parameterBar');
+    paraCloseButton.setAttribute('onclick','closeParameterBar(event)');
+}
+window.addParaBar = addParaBar;
+//add a new block and parameter bar----------------------------------------------------------------------------------------------------------------------------
+
+//delete a block and paarmeter bar----------------------------------------------------------------------------------------------------------------------------
 function deleteBlock(event) {
     var idNum = getIdNumber(event.target.id);
     console.log(idNum);
@@ -99,8 +111,9 @@ function deleteBlock(event) {
     for(let i = idNum+1;i <= idMax; i++) {
         let curBlk = document.getElementById('blockID:' + i);
         curBlk.setAttribute('id', 'blockID:' + (i-1));
-        let curClsB = document.getElementById('closeButton:' + i);
-        curClsB.setAttribute('id', 'closeButton:' + (i-1));
+        let curClsB = document.getElementById('addBlockCloseButton:' + i);
+        curClsB.setAttribute('id', 'addBlockCloseButton:' + (i-1));
+
     }
     idMax--;
     console.log(idMax);

@@ -1,5 +1,26 @@
 {
-    "id": 1,
-    "name": "John Doe",
-    "age": 12
+    "Input":{
+        "numeral":{
+            "inputSize": "*", 
+            "outputSize": "*"  
+        }
+    },
+    "Linear":{
+        "numeral":{
+            "inputSize": "2",
+            "outputSize": "2"
+        },
+        "selection":{
+            "bias":["true","false"]
+        }
+    },
+    "Relu":{
+        "numeral":{
+            "inputSize": "*",
+            "outputSize": "*"
+        },
+        "selection":{
+            "inplace":["true","false"]
+        }
+    }
 }

@@ -50,12 +50,12 @@
     
 
     <!--block prototype
-      <div class="block" id="blockID:1" draggable="true" ondragstart="drag_start(event)" ondblclick="openParameterBar()" tag="input">
+      <div class="block" id="blockID:1" draggable="true" ondragstart="drag_start(event)" ondblclick="openParameterBar(event)" tag="input">
         <a href="javascript:void(0)"  onclick="closeParameterBar()">×</a>
         <h5>Input</h5>
       </div>
       <div class="parameterBar" id="PBarID:1">
-        <a href="javascript:void(0)" class="parameterBar-elements" onclick="closeParameterBar()">×</a>
+        <a href="javascript:void(0)" class="parameterBar-elements" id="PBarClsID:1" onclick="closeParameterBar()">×</a>
         <div class="parameterBar-elements">something here</div>
         <button class="parameterBar-elements" onclick="test()"> test </button> 
       </div>

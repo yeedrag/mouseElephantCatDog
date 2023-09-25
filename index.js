@@ -78,13 +78,13 @@ function addBlock() {
     ele.setAttribute('ondragstart', "drag_start(event)");
     ele.setAttribute('ondblclick','openParameterBar(event)')
 
-    const type = document.getElementById('addBlock-modal-selecter').value;
+    const curType = document.getElementById('addBlock-modal-selecter').value;
     //console.log(type);
-    ele.setAttribute('blockType', type);
+    ele.setAttribute('blockType', curType);
 
-    const text = document.createElement("h2");
-    text.textContent = type;
-    ele.appendChild(text);
+    const textOfBlock = document.createElement("h2");
+    textOfBlock.textContent = curType;
+    ele.appendChild(textOfBlock);
 
     const addBlcokcloseButton = document.createElement("a");
     addBlcokcloseButton.setAttribute('href', 'javascript:void(0)');
@@ -96,23 +96,24 @@ function addBlock() {
     const workspace = document.getElementById('workSpace');
     workspace.appendChild(ele);
 
-    addParameterBar(idCur, type);
+    addParameterBar(idCur, curType);
 }
 window.addBlock = addBlock;
 //parameterBar
-function addParameterBar(idCur, type) {
-    const ele = document.createElement("div");
-    ele.setAttribute('class', 'parameterBar');
-    ele.setAttribute('id', 'PBarID:' + idCur);
+function addParameterBar(idCur, curType) {
+    const newBar = document.createElement("div");
+    newBar.setAttribute('class', 'parameterBar');
+    newBar.setAttribute('id', 'PBarID:' + idCur);
     const paraCloseButton = document.createElement("a");
     paraCloseButton.setAttribute('href', 'javascript:void(0)');
     paraCloseButton.setAttribute('id', 'PBarClsID:' + idCur);
     paraCloseButton.setAttribute('onclick','closeParameterBar(event)');
     paraCloseButton.textContent = "X";
-    ele.appendChild(paraCloseButton);
-    getParameters(blockParameterData, idCur, type);
+    newBar.appendChild(paraCloseButton);
+    getParameters(newBar, blockParameterData, idCur, curType);
+
     const workspace = document.getElementById('workSpace');
-    workspace.appendChild(ele);
+    workspace.appendChild(newBar);
 }
 window.addParameterBar = addParameterBar;
 //add a new block and parameter bar----------------------------------------------------------------------------------------------------------------------------
@@ -121,7 +122,6 @@ window.addParameterBar = addParameterBar;
 function deleteBlock(event) {
     var idNum = getIdNumber(event.target.id);
     //console.log(idNum);
-    
     document.getElementById('blockID:' + idNum).remove();
     for(let i = idNum+1;i <= idCur; i++) {
         let curBlk = document.getElementById('blockID:' + i);

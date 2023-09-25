@@ -7,19 +7,14 @@
     },
     "Linear":{
         "numeral":{
-            "inputSize": "2",
             "outputSize": "2"
         },
-        "selection":{
+        "selectable":{
             "bias":["true","false"]
         }
     },
     "Relu":{
-        "numeral":{
-            "inputSize": "*",
-            "outputSize": "*"
-        },
-        "selection":{
+        "selectable":{
             "inplace":["true","false"]
         }
     }

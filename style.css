@@ -54,6 +54,12 @@ text-decoration: none;
   display: block;
   transition: 0.3s;
 }
+.parameterCutLine{
+    height: 5px;
+    width: 90%;
+    color: black;
+
+}
 /*------------------------------------------------------------------------------------------------------------------------------------*/
 /*addBlockModal*/
 .addBlock-modal-background {

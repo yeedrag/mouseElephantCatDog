@@ -1,8 +1,9 @@
-
+import { getParameters } from "./parameterBarHandler.js";
 //I don't know how to avoid using all the function in global scope. all items with "window." prefix should be fixed in some way.
 
-//initailize ans util------------------------------------------------------------------------------------------------------------------
+//initailize and util------------------------------------------------------------------------------------------------------------------
 var idCur = -1;
+import blockParameterData from './test.json' assert { type: 'json' };;
 function getIdNumber(string) {//get id number from any form of id string whose id number is its suffix
     var idNum=0;
     for(let i = string.length-1, k = 1;string[i]!=':';i--) {
@@ -78,11 +79,13 @@ function addBlock() {
     ele.setAttribute('ondblclick','openParameterBar(event)')
 
     const type = document.getElementById('addBlock-modal-selecter').value;
-    console.log(type);
+    //console.log(type);
     ele.setAttribute('blockType', type);
+
     const text = document.createElement("h2");
     text.textContent = type;
     ele.appendChild(text);
+
     const addBlcokcloseButton = document.createElement("a");
     addBlcokcloseButton.setAttribute('href', 'javascript:void(0)');
     addBlcokcloseButton.setAttribute('id', 'addBlockCloseButton:' + idCur);
@@ -93,11 +96,11 @@ function addBlock() {
     const workspace = document.getElementById('workSpace');
     workspace.appendChild(ele);
 
-    addParameterBar(idCur);
+    addParameterBar(idCur, type);
 }
 window.addBlock = addBlock;
 //parameterBar
-function addParameterBar(idCur) {
+function addParameterBar(idCur, type) {
     const ele = document.createElement("div");
     ele.setAttribute('class', 'parameterBar');
     ele.setAttribute('id', 'PBarID:' + idCur);
@@ -107,7 +110,7 @@ function addParameterBar(idCur) {
     paraCloseButton.setAttribute('onclick','closeParameterBar(event)');
     paraCloseButton.textContent = "X";
     ele.appendChild(paraCloseButton);
-
+    getParameters(blockParameterData, idCur, type);
     const workspace = document.getElementById('workSpace');
     workspace.appendChild(ele);
 }
@@ -117,7 +120,7 @@ window.addParameterBar = addParameterBar;
 //delete a block and paarmeter bar----------------------------------------------------------------------------------------------------------------------------
 function deleteBlock(event) {
     var idNum = getIdNumber(event.target.id);
-    console.log(idNum);
+    //console.log(idNum);
     
     document.getElementById('blockID:' + idNum).remove();
     for(let i = idNum+1;i <= idCur; i++) {
@@ -128,7 +131,7 @@ function deleteBlock(event) {
     }
     deleteParameterBar(idNum);
     idCur--;
-    console.log(idCur);
+    //console.log(idCur);
 }
 window.deleteBlock = deleteBlock;
 
@@ -138,6 +141,6 @@ function deleteParameterBar(idNum) {
         let curPara = document.getElementById('PBarID:' + i);
         curPara.setAttribute('id', 'PBarID:' + (i-1));
     }
-    console.log(idCur);
+    //console.log(idCur);
 }
 //delete block----------------------------------------------------------------------------------------------------------------------------

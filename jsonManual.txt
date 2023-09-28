@@ -1,2 +1,9 @@
-"numeral" category means users should input some numbers. If a parameter in "numeral" category is followed by "*"
-user can input infinity numbers that are slice by "," , or user should input as many numbers as it indicates.    
+This is how JSON file of parameters is designed:
+
+"numeral" category means users should input some numbers and we will give users a text input box to input the number.
+all numeral paramerters' name are followed by a number or '*', which indicate how many numbers the user should input.
+
+TO DO: We should check whether the user's input is valid(we also need to have a format and i have no idea).
+
+"selectable" category means users should select some options from a dropdown menu.(something like "true","false" or "valid","same" ...)
+TO DO: Fuck off, "padding" in Conv block can receive numeral input or selectable input ("same","valid"), and I have to handle that.

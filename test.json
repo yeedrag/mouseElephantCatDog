@@ -7,15 +7,29 @@
     },
     "Linear":{
         "numeral":{
-            "outputSize": "2"
+            "outputSize": 2
         },
         "selectable":{
             "bias":["true","false"]
         }
     },
-    "Relu":{
+    "ReLU":{
         "selectable":{
             "inplace":["true","false"]
+        }
+    },
+    "Conv":{
+        "numeral":{
+            "outputChannels": 1,
+            "kernelSize": 2,
+            "stride": 2,
+            "dilation": 2,
+            "groups": 1
+        },
+        "selectable":{
+            "padding": ["valid","same","numeral"],
+            "bias": ["true","false"],
+            "paddingMode": ["zeros", "reflect", "replicate", "circular"]
         }
     }
 }

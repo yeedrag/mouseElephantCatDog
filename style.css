@@ -38,11 +38,11 @@
 /*ParameterBar*/
 .parameterBar {
     height: 100%;
-    width: 0;
+    width: 0px;
     position: fixed;
     z-index: 2;
-    top: 0;
-    left: 0;
+    top: 0px;
+    left: 0px;
     background-color: #b1b4b5;
     overflow-x: hidden;
     transition: 0.5s;

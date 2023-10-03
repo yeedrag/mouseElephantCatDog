@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--  -->
+    <title>Cool</title>
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0" />-->
+    <meta charset="utf-8" />
+    <!--<meta property="twitter:card" content="summary_large_image"> -->
+    <style data-tag="default-style-sheet">
+      html {font-family: Inter;font-size: 16px;}
+      body {background-color: var(--dl-color-gray-white);}
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="{{ url_for('static', filename='index.js') }}" type="module"></script>
+    <script src="{{ url_for('static', filename='parameterBarHandler.js') }}" type="module"></script>
+  </head>
+  <body>
+
+
+    <!--topBar--------------------------------------------------------------------------------------------------------------------->
+    <div class="fixed-topBar" id="topBarContainer">
+      <ul class="fixed-topBar-list">
+        <li><button class="fixed-topBar-list-elements" id="settingButton"> setting </button></li>
+        <li><a  class="fixed-topBar-list-elements" href="trailPage.html" target="_blank">info</a></li>
+        <li><a  class="fixed-topBar-list-elements" href="trailPage.html" target="_blank">example</a></li>
+        <li><a  class="fixed-topBar-list-elements" href="trailPage.html" target="_blank">tutorial</a></li> 
+        <li id="compileButton"><button class="fixed-topBar-list-elements" onclick='sendingData()'> compile </button></li>
+        <!--addBlock-->
+        <li id="addButton"><label  for="addBlock-modal-flag">add</label></li>
+        <input id="addBlock-modal-flag" type="checkbox" />
+        <div class="addBlock-modal-background">
+            <div class="addBlock-modal">
+              <h3 class="addBlock-modal-elements">Add a block</h3>
+                <select id="addBlock-modal-selecter" class="addBlock-modal-elements">
+                  <!--all the blocks here-->
+                  <option value="Input">Input</option>
+                  <option value="Linear">Linear</option>
+                  <option value="ReLU">Relu</option>
+                  <option value="Conv">Conv</option>
+                  <!--all the blocks here-->
+                </select>
+                <label  for="addBlock-modal-flag" onclick="addBlock()">Confirm</label>
+                <label  for="addBlock-modal-flag">Cancel</label>
+            </div>
+        </div>
+        <!--addBlock-->
+      </ul>
+    </div>
+    <!--topBar--------------------------------------------------------------------------------------------------------------------->
+    <!--workspace---------------------------------------------------------------------------------------------------->
+    <div id="workSpace" ondragover="drag_over(event)" ondrop="drop(event)">
+    
+
+    <!--block prototype
+      <div class="block" id="blockID:1" draggable="true" ondragstart="drag_start(event)" ondblclick="openParameterBar(event)" tag="input">
+        <a href="javascript:void(0)"  onclick="closeParameterBar()">×</a>
+        <h5>Input</h5>
+      </div>
+      <div class="parameterBar" id="PBarID:1">
+        <a href="javascript:void(0)" class="parameterBar-elements" id="PBarClsID:1" onclick="closeParameterBar()">×</a>
+        <div class="parameterBar-elements">something here</div>
+        <button class="parameterBar-elements" onclick="test()"> test </button> 
+      </div>
+    -->
+    </div>
+
+
+    
+    <!--workspace---------------------------------------------------------------------------------------------------->
+
+  </body>
+</html>

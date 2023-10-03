@@ -1,0 +1,92 @@
+/*topBar*/
+/* padding: top right buttom left*/
+.fixed-topBar {
+    background-color: #bfc3c4;
+    position: fixed;
+    min-width: 100%;
+    left: 0;top: 0;
+    height: 64px;
+    z-index: 1;
+}
+.fixed-topBar-list {
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    padding-inline-start: 0px;
+}
+.fixed-topBar-list li {
+    padding: 5px 0px 0px 30px;
+    transform: scale(1.25,1.25);
+}
+/*------------------------------------------------------------------------------------------------------------------------------------*/
+/*Block*/
+#workSpace {
+    align-items: center;
+    width: 2000px;
+    height: 10000px
+}
+.block {
+    background-color: chocolate;
+    height: 100px;
+    width: 100px;
+    left: 0;
+    top: 0;
+    position: absolute;
+}
+
+/*------------------------------------------------------------------------------------------------------------------------------------*/
+/*ParameterBar*/
+.parameterBar {
+    height: 100%;
+    width: 0px;
+    position: fixed;
+    z-index: 2;
+    top: 0px;
+    left: 0px;
+    background-color: #b1b4b5;
+    overflow-x: hidden;
+    transition: 0.5s;
+}
+.parameterBar-elements{
+text-decoration: none;
+  font-size: 25px;
+  color: #6a6a6c;
+  display: block;
+  transition: 0.3s;
+}
+.parameterCutLine{
+    height: 5px;
+    width: 90%;
+    color: black;
+
+}
+/*------------------------------------------------------------------------------------------------------------------------------------*/
+/*addBlockModal*/
+.addBlock-modal-background {
+    opacity: 0;
+    pointer-events: none;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    transition: opacity 0.4s linear;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.addBlock-modal {
+    background-color: #fff;
+    display: block;
+    border-radius: 10px;
+    padding: 12px;
+    max-width: 360px;
+}
+#addBlock-modal-flag {
+    display: none;
+}
+#addBlock-modal-flag:checked + .addBlock-modal-background {
+    opacity: 1;
+    pointer-events: unset;
+}

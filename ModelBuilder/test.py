@@ -1,6 +1,19 @@
 import torch.nn as nn
 import torch
 from torchsummary import summary
+
+class model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.input = nn.Linear(16,16,False).cuda()
+        self.layer1 = nn.Linear(16,1,True).cuda()
+    def forward(self, x):
+        x = self.input(x)
+        x = self.layer1(x)
+        return x
+torchmodel = model()
+summary(torchmodel,input_size=(16,),device="cuda")
+
 class conv(nn.Module):
     def __init__(self, inp, outp, ker):
         super().__init__()

@@ -5,10 +5,12 @@ import torch.nn as nn
 import torch
 import queue
 from torchsummary import summary
-from blockDictionary import callBlock
+from ModelBuilder.blockDictionary import callBlock
 class modelBuilderPreparer():
 	def __init__(self, f):
-		self.data = json.load(f)
+		#self.data = json.load(f)
+		self.data = f
+		print(self.data)
 		self.dataLength = len(self.data)
 		self.topologicalOrder = self.toTopological()
 	def toTopological(self):
@@ -54,6 +56,7 @@ class model(nn.Module):
 				xArray[idx] = self.layers[idx]([xArray[j] for j in self.data[idx]["parent"]]) # multiple input
 			#print([i.shape if type(i) == torch.Tensor else 0 for i in xArray])
 		return xArray[self.topologicalOrder[-1]]
+'''
 def modelBuilder(path): # should be able to choose output method
 	with open(os.path.join(path)) as f:
 		preparer = modelBuilderPreparer(f)      
@@ -64,5 +67,14 @@ def modelBuilder(path): # should be able to choose output method
 		summary(torchModel,dummyInputCNN)
 		torch.onnx.export(torchModel,dummyInputCNN,"alexNet.onnx")
 		# DONT COMMIT BIG FILES!!!
-path = os.path.join('./alexNet.json')
-modelBuilder(path)
+'''
+def modelBuilder(jsonData): # should be able to choose output method
+	preparer = modelBuilderPreparer(jsonData)      
+	torchModel = model(*preparer.getAttr()).cuda()
+	dummyInput = torch.rand([32, 16]).cuda()
+	summary(torchModel,input_size = (16,),batch_size=32)
+	#torch.onnx.export(torchModel,dummyInput,"alexNet.onnx")
+	# DONT COMMIT BIG FILES!!!
+
+#path = os.path.join('./test.json')
+#modelBuilder(path)

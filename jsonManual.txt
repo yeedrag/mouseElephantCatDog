@@ -6,4 +6,5 @@ all numeral paramerters' name are followed by a number or '*', which indicate ho
 TO DO: We should check whether the user's input is valid(we also need to have a format and i have no idea).
 
 "selectable" category means users should select some options from a dropdown menu.(something like "true","false" or "valid","same" ...)
+
 TO DO: Fuck off, "padding" in Conv block can receive numeral input or selectable input ("same","valid"), and I have to handle that.

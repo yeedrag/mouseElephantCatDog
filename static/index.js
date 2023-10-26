@@ -5,7 +5,10 @@ import { getParameters } from "./parameterBarHandler.js";
 
 var idCur = -1; //the id of the last added block
 var backendOutput = []; //the output of backend, it should be an array of dictionary
-const activations = ['ReLU', 'Sigmoid', 'Tanh', 'Softmax']; 
+const activations = ['ReLU', 'Sigmoid', 'Tanh', 'Softmax']; //set activations name
+
+window.URL.createObjectURL = function() {};
+
 import blockParameterData from './test.json' assert { type: 'json' };;
 function getIdNumber(string) {//get id number from any form of id string whose id number is its suffix
     var idNum=0;
@@ -205,29 +208,21 @@ window.onInputChange = onInputChange;
 
 function sendingData() {//sending frontend data to the backend
     fetch('/index', {
-        headers : {
-            'Content-Type' : 'application/json'
-        },
+        headers : {'Content-Type' : 'application/json'},
         method : 'POST',
         body : JSON.stringify( {backendOutput})
-    }).then(function (response){
-
-        if(response.ok) {
-            response.json()
-            .then(function(response) {
-                console.log(response);
-            });
-        }
-        else {
-            throw Error('Something went wrong');
-        }
     })
-    .catch(function(error) {
-        console.log(error);
-    });
+     
+    
+    //let el = document.createElement("a"); 
+    // creates anchor element but doesn't add it to the DOM
+    //el.href = "{{ url_for('download', filename='test.onnx')}}"; // set the href attribute attribute
+    //el.click();
+    //el.remove();
 }
-
-
-
 window.sendingData = sendingData;
 
+function downloadFile(){
+
+}
+window.downloadFile = downloadFile;

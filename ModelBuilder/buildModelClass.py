@@ -3,6 +3,7 @@ import numpy as np
 import json
 import torch.nn as nn
 import torch
+import torchvision
 import queue
 from torchsummary import summary
 from ModelBuilder.blockDictionary import callBlock
@@ -73,7 +74,7 @@ def modelBuilder(jsonData): # should be able to choose output method
 	torchModel = model(*preparer.getAttr()).cuda()
 	dummyInput = torch.rand([32, 16]).cuda()
 	summary(torchModel,input_size = (16,),batch_size=32)
-	#torch.onnx.export(torchModel,dummyInput,"alexNet.onnx")
+	torch.onnx.export(torchModel,dummyInput,"test.onnx",verbose=True)
 	# DONT COMMIT BIG FILES!!!
 
 #path = os.path.join('./test.json')

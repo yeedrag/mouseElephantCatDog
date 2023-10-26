@@ -8,3 +8,15 @@ TO DO: We should check whether the user's input is valid(we also need to have a 
 "selectable" category means users should select some options from a dropdown menu.(something like "true","false" or "valid","same" ...)
 
 TO DO: Fuck off, "padding" in Conv block can receive numeral input or selectable input ("same","valid"), and I have to handle that.
+
+.then(function (response){
+        if(response.ok) {
+            response.json()
+            .then(function(response) {
+                console.log(response);
+            });
+        }
+        else throw Error('Something went wrong');
+    }).catch(function(error) {
+        console.log(error);
+    });

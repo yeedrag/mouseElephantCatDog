@@ -62,7 +62,7 @@ body > div {
 	position: absolute;
 	background-color: #f1f1f1;
 	border: solid 2px #d3d3d3;
-
+	min-width: 16ch;
 	width: fit-content;
 	height: fit-content;
 }
@@ -75,6 +75,7 @@ body > div {
 
 .block > .content {
 	background-color: #222;
+	text-align: left;
 }
 
 .block > :is(.inputPorts, .outputPorts) {

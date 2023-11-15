@@ -191,7 +191,11 @@ function createBlock({
 qry("#addBlock").addEventListener("click", e => {
 	//get according blockType using html <select> scroller
 	let typeName = document.getElementById("blockType").value, content = "";
-	content = '<pre>'+ JSON.stringify(blockTypes[typeName],undefined, 2) + '</pre>';
+	content = `
+	<p>Input size:</p>
+	<p>${blockTypes[typeName]["args"]["inputSize"]}</p>
+	<p>Output size:</p>
+	<p>${blockTypes[typeName]["args"]["outputSize"]}</p>`;
 	
 	qry("#workspace").appendChild(createBlock({ header: typeName, content }));
 });
@@ -392,4 +396,51 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 			listenToClick();
 		});
 	}
+}
+
+//block config place once block is clicked
+
+{
+	blockConfigQuery = qry("#blockConfig"), wsDiv = qry("#workspace");
+
+	const prepareForAnotherProcess = () => {
+		// "process" here and below means the period while no block is selected
+
+		blockConfigQuery.innerHTML = `Block Config`;
+		addLineBtn.addEventListener("click", addLine, { once: true });
+	};
+
+
+
+	
+	const findTheBlock = e => { // click event
+		e.preventDefault();
+		e.stopPropagation();
+			// prevent other things in the element from working
+			// e.g.: buttons, inputs or ports in the block
+
+		// finding block
+		let tmp = e.target;
+		while (!tmp.classList.contains("block")) {
+			if (tmp == wsDiv) {
+				listenToClick();
+				return;
+			}
+			tmp = tmp.parentElement;
+		}
+		const block = tmp;
+		resolve(block);
+	};
+
+	const listenToClick = () => wsDiv.addEventListener(
+		"click",
+		findTheBlock,
+		{ signal: signal, once: true, capture: true }
+			// `capture: true` is to prevent things in the element clicked from working
+			// e.g. ports, buttons or inputs in the block
+	);
+
+	listenToClick();
+
+
 }

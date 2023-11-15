@@ -403,44 +403,87 @@ qry("#workspace").appendChild(createBlock({ header: "Input" }));
 {
 	blockConfigQuery = qry("#blockConfig"), wsDiv = qry("#workspace");
 
-	const prepareForAnotherProcess = () => {
+	const prepareForShowingArgs = () => {
 		// "process" here and below means the period while no block is selected
-
 		blockConfigQuery.innerHTML = `Block Config`;
-		addLineBtn.addEventListener("click", addLine, { once: true });
+		showArgs();
 	};
-
-
-
 	
-	const findTheBlock = e => { // click event
-		e.preventDefault();
-		e.stopPropagation();
-			// prevent other things in the element from working
-			// e.g.: buttons, inputs or ports in the block
+	const showArgs = async e => { // click event
 
-		// finding block
-		let tmp = e.target;
-		while (!tmp.classList.contains("block")) {
-			if (tmp == wsDiv) {
-				listenToClick();
-				return;
+
+		// cancel the process if clicked elsewhere
+		// all the long-term processes should listen to this AbortController.signal
+		const showArgsProcess = new AbortController();
+
+		wsDiv.addEventListener("dblclick", e => {
+			if(e.target.classList.contains("Blocks")){
+				e.classList.add("Selected");
+				tmp = e;
+				blockConfigQuery.innerHTML = `<p>clicked ${e.value}</p>`
 			}
-			tmp = tmp.parentElement;
-		}
-		const block = tmp;
-		resolve(block);
-	};
+			if(!e.target.classList.contains("Selected")){
+				showArgsProcess.abort();
+				prepareForAnotherProcess();
+				tmp.classList.remove("Selected");
+			}
+			
+		}, { once: true });
 
-	const listenToClick = () => wsDiv.addEventListener(
-		"click",
-		findTheBlock,
-		{ signal: signal, once: true, capture: true }
-			// `capture: true` is to prevent things in the element clicked from working
-			// e.g. ports, buttons or inputs in the block
-	);
+		let selectedBlock = await userSelectedABlock({ signal: addLineProcess.signal })
+			.catch(err => {
+				if (err.name != "aborted")
+					console.log("Error: ", err);
+			});
+		block1.classList.add("selected");
 
-	listenToClick();
+		
 
+		if (addLineProcess.signal.aborted) return prepareForShowingArgs();
+
+		blockConfigQuery.innerHTML = `Input:<input> ${tmp.value}</input>  Output:<input></input>`
+		
+
+
+
+		prepareForShowingArgs();
+	}
+
+	const userSelectedABlock = ({ signal: signal }) => {
+		return new Promise((resolve, reject) => {
+			if (signal.aborted) fail({ name: "aborted" });
+			signal.addEventListener("abort", e => reject({ name: "aborted" }), { once: true });
+
+			const findTheBlock = e => { // click event
+				e.preventDefault();
+				e.stopPropagation();
+					// prevent other things in the element from working
+					// e.g.: buttons, inputs or ports in the block
+
+				// finding block
+				let tmp = e.target;
+				while (!tmp.classList.contains("block")) {
+					if (tmp == wsDiv) {
+						listenToClick();
+						alert("Please click on a block");
+						return;
+					}
+					tmp = tmp.parentElement;
+				}
+				const block = tmp;
+				resolve(block);
+			};
+
+			const listenToClick = () => wsDiv.addEventListener(
+				"dblclick",
+				findTheBlock,
+				{ signal: signal, once: true, capture: true }
+					// `capture: true` is to prevent things in the element clicked from working
+					// e.g. ports, buttons or inputs in the block
+			);
+
+			listenToClick();
+		});
+	}
 
 }
